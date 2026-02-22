@@ -1,0 +1,2128 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Webshop Clicker Game 🛒</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f0f4f8;--bg2:#e2e8f0;--card:#ffffff;
+  --accent:#2563eb;--accent2:#3b82f6;--accentLight:#dbeafe;
+  --green:#10b981;--greenLight:#d1fae5;
+  --pink:#ec4899;--purple:#7c3aed;--orange:#f59e0b;
+  --text:#1e293b;--textSoft:#334155;--muted:#94a3b8;
+  --border:#cbd5e1;--borderLight:#e2e8f0;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04);
+  --shadowHover:0 4px 20px rgba(37,99,235,.12),0 1px 3px rgba(0,0,0,.06);
+  --radius:14px;
+}
+html{height:100%;overflow:hidden}
+body{height:100%;max-height:100vh;max-height:100dvh;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+/* Shopify embed: when inside another page, allow the game to fill its container */
+html.shopify-embed,html.shopify-embed body{height:100vh;height:100dvh;overflow:hidden;position:fixed;inset:0}
+
+/* === Responsive scaling === */
+@media (min-width:1600px){html{font-size:18px}}
+@media (min-width:2000px){html{font-size:20px}}
+@media (min-width:2500px){html{font-size:23px}}
+@media (min-width:3200px){html{font-size:26px}}
+@media (min-width:3800px){html{font-size:30px}}
+
+/* Compact mode for smaller heights (e.g. iframe in Shopify) */
+@media (max-height:800px){
+  .topbar{padding:5px 16px}
+  .logo{font-size:1.2rem}
+  .stat{padding:2px 8px}
+  .stat-label{font-size:.5rem}
+  .stat-value{font-size:.7rem}
+  .tab-btn{padding:8px 6px;font-size:.68rem}
+  .upgrade{padding:5px 8px}
+  .upgrade-icon{width:30px;height:30px;font-size:1rem}
+  .upgrade-name{font-size:.72rem}
+  .upgrade-desc{font-size:.6rem}
+  .news-ticker{height:28px}
+  .news-ticker-label{font-size:.6rem;padding:0 10px}
+  .center{padding-bottom:60px}
+  .revenue-display{font-size:2.4rem}
+  .revenue-card{padding:10px 30px 8px}
+  .per-sec{font-size:.75rem;padding:4px 14px;margin-top:10px}
+  .progress-wrap{margin-top:10px;width:240px}
+  .cart-btn{width:7rem;height:7rem;font-size:3rem}
+  .menu-toggle{padding:6px 14px;font-size:.7rem}
+  .achievement{padding:5px 8px}
+  .achievement-icon{width:28px;height:28px;font-size:.9rem}
+  .achievement-name{font-size:.68rem}
+  .achievement-desc{font-size:.58rem}
+}
+
+/* === INTENSE animated background === */
+.bg-blobs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.45;animation:blobFloat 14s ease-in-out infinite alternate}
+.blob:nth-child(1){width:600px;height:600px;background:linear-gradient(135deg,#60a5fa,#a78bfa);top:-15%;left:-8%;animation-duration:16s}
+.blob:nth-child(2){width:500px;height:500px;background:linear-gradient(135deg,#818cf8,#f472b6);bottom:-12%;right:-8%;animation-duration:13s;animation-delay:-4s}
+.blob:nth-child(3){width:450px;height:450px;background:linear-gradient(135deg,#34d399,#60a5fa);top:30%;left:40%;animation-duration:18s;animation-delay:-8s}
+.blob:nth-child(4){width:350px;height:350px;background:linear-gradient(135deg,#fbbf24,#f472b6);top:5%;right:15%;animation-duration:15s;animation-delay:-2s}
+.blob:nth-child(5){width:300px;height:300px;background:linear-gradient(135deg,#2dd4bf,#818cf8);bottom:10%;left:10%;animation-duration:20s;animation-delay:-12s}
+.blob:nth-child(6){width:250px;height:250px;background:linear-gradient(135deg,#fb923c,#f43f5e);top:60%;right:30%;animation-duration:11s;animation-delay:-6s}
+@keyframes blobFloat{
+  0%{transform:translate(0,0) scale(1) rotate(0deg)}
+  25%{transform:translate(60px,-50px) scale(1.15) rotate(5deg)}
+  50%{transform:translate(-40px,60px) scale(.9) rotate(-3deg)}
+  75%{transform:translate(30px,20px) scale(1.1) rotate(4deg)}
+  100%{transform:translate(-20px,-30px) scale(1.05) rotate(-2deg)}
+}
+
+/* Floating emojis - more intense */
+.bg-coins{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-coin{position:absolute;opacity:.12;animation:coinDrift linear infinite}
+@keyframes coinDrift{
+  0%{transform:translateY(110vh) rotate(0deg) scale(1)}
+  50%{transform:translateY(50vh) rotate(180deg) scale(1.3)}
+  100%{transform:translateY(-10vh) rotate(360deg) scale(1)}
+}
+
+/* Surprise emoji that zooms across */
+.surprise-emoji{
+  position:fixed;z-index:2;pointer-events:none;
+  font-size:4rem;opacity:.25;
+  animation:surpriseZoom 3.5s ease-in-out forwards;
+}
+@keyframes surpriseZoom{
+  0%{transform:translate(var(--sx),var(--sy)) scale(.8) rotate(0deg)}
+  50%{transform:translate(50vw,40vh) scale(2) rotate(180deg)}
+  100%{transform:translate(var(--ex),var(--ey)) scale(.8) rotate(360deg)}
+}
+
+/* Confetti burst */
+.confetti{
+  position:fixed;pointer-events:none;z-index:3;
+  width:8px;height:8px;border-radius:2px;opacity:.7;
+  animation:confettiFall 3s ease-out forwards;
+}
+@keyframes confettiFall{
+  0%{transform:translate(0,0) rotate(0deg) scale(1)}
+  100%{transform:translate(var(--cx),var(--cy)) rotate(720deg) scale(.2)}
+}
+
+/* Shooting star */
+.shooting-star{
+  position:fixed;z-index:1;pointer-events:none;
+  width:80px;height:2px;
+  background:linear-gradient(90deg,transparent,#60a5fa,#fff,transparent);
+  border-radius:2px;opacity:.6;
+  animation:shootingStar 1.5s ease-out forwards;
+}
+@keyframes shootingStar{
+  0%{transform:translate(var(--sx2),var(--sy2)) rotate(var(--angle))}
+  100%{transform:translate(calc(var(--sx2) + var(--dx2)),calc(var(--sy2) + var(--dy2))) rotate(var(--angle))}
+}
+
+/* Spinning mega emoji */
+.mega-spin{
+  position:fixed;z-index:1;pointer-events:none;
+  font-size:8rem;opacity:.15;
+  animation:megaSpin 4s ease-in-out forwards;
+}
+@keyframes megaSpin{
+  0%{transform:translate(-10vw,50vh) scale(2) rotate(0deg)}
+  50%{transform:translate(50vw,40vh) scale(5) rotate(180deg)}
+  100%{transform:translate(110vw,50vh) scale(2) rotate(360deg)}
+}
+
+/* === Topbar === */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 20px;
+  background:rgba(255,255,255,.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--borderLight);flex-shrink:0;z-index:10;position:relative;
+}
+.logo{
+  font-weight:900;font-size:1.5rem;letter-spacing:-.5px;
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,var(--accent),#7c3aed);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.stats-bar{display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:.8rem}
+.stat{display:flex;flex-direction:column;align-items:flex-end;background:var(--accentLight);padding:4px 12px;border-radius:10px}
+.stat-label{color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1px;font-family:'Nunito',sans-serif;font-weight:700}
+.stat-value{color:var(--accent);font-weight:700}
+.topbar-btn{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  color:var(--muted);font-size:1.1rem;cursor:pointer;padding:6px 10px;
+  transition:all .2s;box-shadow:var(--shadow);
+}
+.topbar-btn:hover{border-color:var(--accent);color:var(--accent);transform:scale(1.05)}
+.topbar-btn.on{color:var(--accent);border-color:var(--accent);background:var(--accentLight)}
+.luxury-icons{display:flex;gap:4px;align-items:center;flex-wrap:nowrap;overflow-x:auto;max-width:300px}
+.luxury-icons::-webkit-scrollbar{display:none}
+.lux-icon{
+  background:linear-gradient(135deg,#fef3c7,#fde68a);
+  border:1px solid #f59e0b;border-radius:8px;
+  padding:3px 6px;font-size:1rem;line-height:1;
+  flex-shrink:0;
+  animation:luxPop .3s cubic-bezier(.34,1.56,.64,1);
+  cursor:default;position:relative;
+}
+.lux-icon:hover::after{
+  content:attr(data-name);
+  position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);
+  background:var(--text);color:#fff;font-size:.6rem;font-weight:700;
+  padding:3px 8px;border-radius:6px;white-space:nowrap;z-index:20;
+}
+@keyframes luxPop{0%{transform:scale(0)}100%{transform:scale(1)}}
+
+/* === Main === */
+.main{display:flex;flex:1;overflow:hidden;position:relative;z-index:1}
+
+/* === Left Panel === */
+.panel-left{
+  width:22rem;flex-shrink:0;display:flex;flex-direction:column;
+  background:rgba(255,255,255,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-right:1px solid var(--borderLight);
+}
+.tab-bar{display:flex;flex-shrink:0;border-bottom:1px solid var(--borderLight);background:rgba(255,255,255,.5)}
+.tab-btn{
+  flex:1;padding:12px 8px;text-align:center;cursor:pointer;
+  font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  color:var(--muted);background:transparent;border:none;
+  border-bottom:3px solid transparent;transition:all .25s;font-family:'Nunito',sans-serif;
+}
+.tab-btn:hover{color:var(--textSoft);background:rgba(37,99,235,.03)}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(37,99,235,.05)}
+.tab-content{display:none;flex:1;overflow-y:auto;padding:10px}
+.tab-content.active{display:block}
+.tab-content::-webkit-scrollbar{width:5px}
+.tab-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+
+.upgrade{
+  background:var(--card);border:1px solid var(--borderLight);border-radius:var(--radius);
+  padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:all .25s;
+  position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);
+}
+.upgrade::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(37,99,235,.04),transparent);opacity:0;transition:opacity .25s}
+.upgrade:hover{border-color:var(--accent);box-shadow:var(--shadowHover);transform:translateX(4px)}
+.upgrade:hover::before{opacity:1}
+.upgrade.locked{opacity:.4;box-shadow:none;cursor:default}
+.upgrade.bought{opacity:.45;box-shadow:none;cursor:default}
+.upgrade.bought .upgrade-name{text-decoration:line-through;text-decoration-color:var(--muted)}
+.upgrade-icon{font-size:1.5rem;flex-shrink:0;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--accentLight);border-radius:10px}
+.upgrade-mid{flex:1;overflow:hidden}
+.upgrade-name{font-weight:800;font-size:.82rem;word-wrap:break-word;overflow-wrap:break-word;color:var(--text)}
+.upgrade-desc{font-size:.68rem;color:var(--muted);line-height:1.3;font-weight:600}
+.upgrade-right{text-align:right;flex-shrink:0}
+.upgrade-cost{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--accent);font-weight:700}
+.upgrade-count{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:20px;display:none;white-space:nowrap;margin-top:3px}
+.upgrade-count.visible{display:inline-block}
+
+/* === Center === */
+.center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:120px;position:relative;overflow:hidden}
+.center-bg{position:absolute;inset:0;background:
+  radial-gradient(ellipse at 50% 30%,rgba(37,99,235,.1) 0%,transparent 50%),
+  radial-gradient(ellipse at 30% 70%,rgba(124,58,237,.06) 0%,transparent 40%),
+  radial-gradient(ellipse at 70% 60%,rgba(59,130,246,.05) 0%,transparent 40%)
+}
+.click-area{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;user-select:none;-webkit-user-select:none}
+
+/* Revenue display */
+.revenue-card{
+  background:rgba(255,255,255,.7);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:20px;
+  padding:18px 44px 14px;
+  margin-bottom:20px;
+  box-shadow:0 8px 32px rgba(37,99,235,.08),0 1px 2px rgba(0,0,0,.04);
+  display:flex;flex-direction:column;align-items:center;
+}
+.revenue-display{
+  font-family:'JetBrains Mono',monospace;font-size:3.2rem;font-weight:900;
+  text-align:center;margin-bottom:0;letter-spacing:-2px;
+  color:#1e3a5f;
+  text-shadow:0 1px 0 rgba(255,255,255,.8),0 4px 20px rgba(37,99,235,.15);
+}
+.revenue-label{
+  font-family:'Nunito',sans-serif;
+  color:transparent;font-size:.6rem;margin-bottom:0;letter-spacing:5px;font-weight:900;
+  text-transform:uppercase;
+  background:linear-gradient(90deg,var(--accent),var(--accent));
+  -webkit-background-clip:text;background-clip:text;
+  position:relative;
+}
+.revenue-label::before,.revenue-label::after{
+  content:'';position:absolute;top:50%;height:1px;width:40px;
+  background:linear-gradient(90deg,transparent,rgba(37,99,235,.3));
+}
+.revenue-label::before{right:100%;margin-right:10px}
+.revenue-label::after{left:100%;margin-left:10px;background:linear-gradient(90deg,rgba(37,99,235,.3),transparent)}
+
+/* Cart button */
+.cart-btn-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+.cart-btn{
+  width:8rem;height:8rem;border-radius:50%;
+  background:linear-gradient(145deg,#60a5fa,#2563eb 50%,#1e40af);
+  border:none;cursor:pointer;position:relative;
+  display:flex;align-items:center;justify-content:center;font-size:4rem;
+  box-shadow:
+    0 0 0 4px rgba(255,255,255,.7),
+    0 0 0 6px rgba(37,99,235,.12),
+    0 12px 40px rgba(37,99,235,.3),
+    inset 0 -6px 18px rgba(0,0,0,.15),
+    inset 0 6px 18px rgba(255,255,255,.12);
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1),box-shadow .15s;
+  animation:btnFloat 4s ease-in-out infinite;
+}
+.cart-btn::before{
+  content:'';position:absolute;top:10px;left:18px;width:50%;height:35%;border-radius:50%;
+  background:radial-gradient(ellipse at 40% 40%,rgba(255,255,255,.35),transparent 70%);
+  pointer-events:none;
+}
+@keyframes btnFloat{
+  0%,100%{transform:translateY(0);box-shadow:0 0 0 4px rgba(255,255,255,.7),0 0 0 6px rgba(37,99,235,.12),0 12px 40px rgba(37,99,235,.3),inset 0 -6px 18px rgba(0,0,0,.15),inset 0 6px 18px rgba(255,255,255,.12)}
+  50%{transform:translateY(-6px);box-shadow:0 0 0 4px rgba(255,255,255,.8),0 0 0 8px rgba(37,99,235,.15),0 20px 50px rgba(37,99,235,.35),inset 0 -6px 18px rgba(0,0,0,.15),inset 0 6px 18px rgba(255,255,255,.12)}
+}
+.cart-btn:hover{
+  box-shadow:0 0 0 4px rgba(255,255,255,.9),0 0 0 10px rgba(37,99,235,.2),0 20px 60px rgba(37,99,235,.4),inset 0 -6px 18px rgba(0,0,0,.15),inset 0 6px 18px rgba(255,255,255,.12);
+  animation:none;transform:translateY(-4px);
+}
+.cart-btn:active{transform:scale(.9) translateY(0) !important}
+.cart-btn.clicked{transform:scale(.85) translateY(0) !important}
+
+/* Click ripple effect */
+.click-ring{
+  position:absolute;border-radius:50%;pointer-events:none;
+  border:3px solid rgba(37,99,235,.5);
+  animation:ringExpand .6s ease-out forwards;
+}
+@keyframes ringExpand{
+  0%{width:8rem;height:8rem;opacity:1;transform:translate(-50%,-50%) scale(1)}
+  100%{width:8rem;height:8rem;opacity:0;transform:translate(-50%,-50%) scale(2.5)}
+}
+.click-sparkle{
+  position:absolute;pointer-events:none;
+  width:6px;height:6px;border-radius:50%;
+  animation:sparkleOut .7s ease-out forwards;
+}
+@keyframes sparkleOut{
+  0%{opacity:1;transform:translate(0,0) scale(1)}
+  100%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(0)}
+}
+.click-star{
+  position:absolute;pointer-events:none;font-size:1.2rem;
+  animation:starFloat .8s ease-out forwards;
+}
+@keyframes starFloat{
+  0%{opacity:1;transform:translate(0,0) scale(0) rotate(0deg)}
+  30%{opacity:1;transform:translate(var(--sx),var(--sy)) scale(1.2) rotate(90deg)}
+  100%{opacity:0;transform:translate(calc(var(--sx)*2),calc(var(--sy)*2.5)) scale(0) rotate(360deg)}
+}
+
+/* Per second badge */
+.per-sec{
+  margin-top:18px;font-size:.85rem;font-family:'JetBrains Mono',monospace;font-weight:800;
+  background:rgba(255,255,255,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  padding:5px 20px;border-radius:24px;
+  border:1px solid var(--borderLight);
+  box-shadow:0 4px 20px rgba(37,99,235,.08);
+  color:var(--accent);
+  display:flex;align-items:center;gap:6px;
+}
+
+/* Progress bar */
+.progress-wrap{margin-top:16px;width:280px}
+.progress-label{font-size:.66rem;color:var(--muted);margin-bottom:5px;text-align:center;font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.3px}
+.progress-bar{
+  width:100%;height:10px;
+  background:rgba(255,255,255,.5);backdrop-filter:blur(8px);
+  border-radius:10px;overflow:hidden;
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.03);
+  border:1px solid var(--borderLight);
+}
+.progress-fill{
+  height:100%;border-radius:10px;transition:width .3s;width:0%;
+  background:linear-gradient(90deg,#2563eb,#60a5fa,#a78bfa,#60a5fa,#2563eb);
+  background-size:300% 100%;animation:shimmer 3s linear infinite;
+}
+@keyframes shimmer{0%{background-position:300% 0}100%{background-position:-300% 0}}
+
+/* Prestige button */
+.prestige-btn{
+  margin-top:14px;padding:10px 24px;border-radius:25px;
+  background:linear-gradient(135deg,#7c3aed,#a855f7,#7c3aed);background-size:200% 200%;
+  border:none;color:#fff;font-family:'Nunito',sans-serif;font-weight:800;font-size:.82rem;
+  cursor:pointer;display:none;letter-spacing:.3px;
+  box-shadow:0 4px 24px rgba(124,58,237,.3),0 0 0 2px rgba(124,58,237,.1);
+  transition:all .25s;animation:prestigeGlow 3s ease-in-out infinite;
+}
+@keyframes prestigeGlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.prestige-btn:hover{transform:scale(1.08);box-shadow:0 6px 35px rgba(124,58,237,.4),0 0 0 3px rgba(124,58,237,.15)}
+.prestige-btn.visible{display:block}
+.prestige-info{font-size:.62rem;color:var(--purple);margin-top:5px;font-family:'JetBrains Mono',monospace;display:none;font-weight:700}
+.prestige-info.visible{display:block}
+
+/* === Customers === */
+.customer-layer{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.customer{
+  position:absolute;font-size:1.4rem;
+  display:flex;flex-direction:column;align-items:center;gap:0;
+}
+.customer.from-left{animation:custRight var(--dur,8s) linear forwards}
+.customer.from-right{animation:custLeft var(--dur,8s) linear forwards}
+.customer .c-bubble{
+  font-size:.55rem;background:rgba(255,255,255,.85);
+  padding:2px 6px;border-radius:8px;margin-bottom:2px;
+  color:var(--textSoft);font-weight:700;white-space:nowrap;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);
+  opacity:0;animation:bubPop .3s ease-out .8s forwards;
+}
+@keyframes bubPop{to{opacity:1}}
+.customer .c-body{animation:custBob .4s ease-in-out infinite alternate}
+@keyframes custBob{0%{transform:translateY(0)}100%{transform:translateY(-3px)}}
+@keyframes custRight{
+  0%{left:-5%;opacity:0;transform:scaleX(1)}
+  4%{opacity:1}
+  42%{left:46%;transform:scaleX(1)}
+  50%{left:46%;transform:scaleX(-1)}
+  96%{opacity:1}
+  100%{left:-5%;opacity:0;transform:scaleX(-1)}
+}
+@keyframes custLeft{
+  0%{right:-5%;opacity:0;transform:scaleX(-1)}
+  4%{opacity:1}
+  42%{right:46%;transform:scaleX(-1)}
+  50%{right:46%;transform:scaleX(1)}
+  96%{opacity:1}
+  100%{right:-5%;opacity:0;transform:scaleX(1)}
+}
+.customer-counter{
+  position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+  z-index:3;font-size:.68rem;font-weight:700;color:var(--muted);
+  background:rgba(255,255,255,.7);backdrop-filter:blur(8px);
+  padding:3px 12px;border-radius:12px;border:1px solid var(--borderLight);
+  font-family:'JetBrains Mono',monospace;pointer-events:none;
+}
+
+.float-num{position:absolute;font-family:"JetBrains Mono",monospace;font-weight:800;color:#39ff14;pointer-events:none;z-index:10;animation:floatUp .9s ease-out forwards;font-size:1.7rem;text-shadow:0 0 12px rgba(57,255,20,.8),0 0 4px rgba(0,0,0,.6);background:rgba(0,0,0,.35);padding:2px 10px;border-radius:12px}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-130px) scale(.5)}}
+.particle{position:absolute;border-radius:50%;pointer-events:none;z-index:5;animation:particleFly .8s ease-out forwards}
+@keyframes particleFly{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0)}}
+
+/* === Right Panel === */
+.panel-right{
+  width:20rem;flex-shrink:0;overflow-y:auto;
+  border-left:1px solid var(--borderLight);padding:1rem;
+  background:rgba(255,255,255,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+}
+.panel-right::-webkit-scrollbar{width:5px}
+.panel-right::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+.section-title{font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin:10px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--borderLight);font-weight:800}
+
+/* Rivals */
+.rival{
+  background:var(--card);border:1px solid var(--borderLight);border-radius:10px;
+  padding:6px 10px;margin-bottom:4px;display:flex;align-items:center;gap:8px;
+  transition:all .4s;box-shadow:0 1px 2px rgba(0,0,0,.03);font-size:.72rem;
+}
+.rival.defeated{border-color:var(--green);background:linear-gradient(135deg,#fff,var(--greenLight));box-shadow:0 2px 10px rgba(16,185,129,.1)}
+.rival.current{border-color:var(--accent);background:linear-gradient(135deg,#eff6ff,#dbeafe);box-shadow:0 2px 10px rgba(37,99,235,.1)}
+.rival-icon{font-size:1.15rem;flex-shrink:0}
+.rival-info{flex:1;min-width:0}
+.rival-name{font-weight:800;font-size:.72rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rival-speed{font-size:.6rem;color:var(--muted);font-weight:600}
+.rival-status{font-size:.6rem;font-weight:800;flex-shrink:0}
+.rival-status.beaten{color:var(--green)}
+.rival-status.ahead{color:var(--accent)}
+.rival-status.far{color:var(--muted)}
+
+/* Reviews */
+.review{
+  background:var(--card);border:1px solid var(--borderLight);border-radius:10px;
+  padding:8px 10px;margin-bottom:5px;
+  box-shadow:0 1px 2px rgba(0,0,0,.03);animation:fadeIn .5s;
+}
+.review-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+.review-name{font-size:.68rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:4px}
+.review-stars{font-size:.65rem;letter-spacing:1px}
+.review-text{font-size:.66rem;color:var(--muted);font-weight:600;line-height:1.5;font-style:italic}
+.review-date{font-size:.55rem;color:var(--border);font-weight:600;margin-top:3px;text-align:right}
+.tab-btn .tab-badge{
+  background:#ef4444;color:#fff;font-size:.55rem;font-weight:800;
+  padding:1px 5px;border-radius:10px;margin-left:4px;
+  display:none;animation:badgePop .3s cubic-bezier(.34,1.56,.64,1);
+}
+.tab-btn .tab-badge.visible{display:inline-block}
+@keyframes badgePop{0%{transform:scale(0)}100%{transform:scale(1)}}
+.tab-btn.has-new{animation:tabGlow 1s ease-in-out 3}
+@keyframes tabGlow{
+  0%,100%{background:transparent}
+  50%{background:rgba(239,68,68,.1)}
+}
+
+/* Season box (tooltip style, game area top-right) */
+.season-box{
+  position:absolute;top:16px;right:16px;z-index:8;
+  background:rgba(251,191,36,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(245,158,11,.6);border-radius:14px;
+  padding:10px 16px;max-width:240px;
+  box-shadow:0 8px 30px rgba(245,158,11,.2),0 1px 2px rgba(0,0,0,.06);
+  opacity:0;transform:translateY(-10px) scale(.95);
+  transition:all .4s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none;
+}
+.season-box.visible{opacity:1;transform:translateY(0) scale(1)}
+.season-box-title{font-size:.82rem;font-weight:900;color:#78350f;margin-bottom:2px}
+.season-box-desc{font-size:.66rem;font-weight:700;color:#92400e;line-height:1.4}
+.season-box-mult{
+  display:inline-block;margin-top:4px;
+  background:rgba(120,53,15,.15);color:#78350f;
+  font-size:.7rem;font-weight:900;padding:2px 10px;border-radius:8px;
+  font-family:'JetBrains Mono',monospace;
+}
+.season-box-timer{font-size:.58rem;color:#a16207;font-weight:700;margin-top:4px}
+.season-box-bar{width:100%;height:4px;background:rgba(120,53,15,.15);border-radius:4px;margin-top:6px;overflow:hidden}
+.season-box-fill{height:100%;background:#78350f;border-radius:4px;transition:width .5s linear}
+
+/* Achievements */
+.achievement{background:var(--card);border:1px solid var(--borderLight);border-radius:10px;padding:6px 10px;margin-bottom:4px;display:flex;align-items:center;gap:8px;opacity:.35;transition:all .4s;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.achievement.unlocked{opacity:1;border-color:var(--green);background:linear-gradient(135deg,#fff,var(--greenLight));box-shadow:0 2px 10px rgba(16,185,129,.1)}
+.achievement-icon{font-size:1.15rem;flex-shrink:0}
+.achievement-info{flex:1}
+.achievement-name{font-weight:800;font-size:.72rem;color:var(--text)}
+.achievement-desc{font-size:.62rem;color:var(--muted);font-weight:600}
+
+/* === Menu === */
+.menu-toggle{
+  position:fixed;bottom:2.75rem;right:1.25rem;z-index:20;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:10px 16px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.1);
+  font-family:'Nunito',sans-serif;font-weight:800;font-size:.85rem;
+  color:var(--accent);transition:all .25s;display:flex;align-items:center;gap:8px;
+}
+.menu-toggle:hover{transform:scale(1.05);box-shadow:0 6px 30px rgba(37,99,235,.15)}
+.menu-toggle .badge{
+  background:var(--accent);color:#fff;font-size:.65rem;padding:1px 7px;border-radius:20px;
+  min-width:20px;text-align:center;display:none;
+}
+.menu-toggle .badge.visible{display:inline-block}
+.menu-panel{
+  position:fixed;bottom:5.25rem;right:1.25rem;z-index:19;
+  width:24rem;max-height:30rem;
+  background:rgba(255,255,255,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--borderLight);border-radius:18px;
+  box-shadow:0 10px 50px rgba(0,0,0,.12);
+  transform:translateY(20px) scale(.95);opacity:0;pointer-events:none;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.menu-panel.open{transform:translateY(0) scale(1);opacity:1;pointer-events:auto}
+.menu-tabs{display:flex;border-bottom:1px solid var(--borderLight);flex-shrink:0}
+.menu-tab{
+  flex:1;padding:11px 8px;text-align:center;cursor:pointer;
+  font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.3px;
+  color:var(--muted);background:transparent;border:none;
+  border-bottom:3px solid transparent;transition:all .2s;font-family:'Nunito',sans-serif;
+}
+.menu-tab:hover{color:var(--textSoft)}
+.menu-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(37,99,235,.04)}
+.menu-page{display:none;flex:1;overflow-y:auto;padding:14px 18px}
+.menu-page.active{display:block}
+.menu-page::-webkit-scrollbar{width:4px}
+.menu-page::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+.menu-page h3{font-size:.82rem;color:var(--text);margin:0 0 6px;font-weight:900}
+.menu-page p,.menu-page li{font-size:.72rem;color:var(--muted);line-height:1.6;font-weight:600;margin-bottom:6px}
+.menu-page ul{padding-left:16px;margin-bottom:10px}
+.menu-page .section{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--borderLight)}
+.menu-page .section:last-child{border-bottom:none;margin-bottom:0}
+.menu-page .kbd{
+  display:inline-block;background:var(--accentLight);color:var(--accent);
+  font-size:.62rem;font-weight:800;padding:2px 7px;border-radius:6px;
+  font-family:'JetBrains Mono',monospace;
+}
+.menu-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.menu-action-btn{
+  padding:8px 18px;border-radius:12px;border:none;font-family:'Nunito',sans-serif;
+  font-weight:800;font-size:.78rem;cursor:pointer;transition:all .2s;
+}
+.menu-action-btn.save{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 3px 12px rgba(37,99,235,.15)}
+.menu-action-btn.save:hover{transform:scale(1.05)}
+.menu-action-btn.reset{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5}
+.menu-action-btn.reset:hover{background:#fecaca;transform:scale(1.05)}
+.log-entry{font-size:.72rem;color:var(--muted);padding:5px 0;border-bottom:1px solid var(--borderLight);animation:fadeIn .3s;font-weight:600}
+.log-entry span{color:var(--accent);font-weight:700}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+/* === Sliding banners === */
+.banner-track{
+  position:fixed;top:54px;left:0;right:0;z-index:100;
+  overflow:visible;pointer-events:none;
+}
+.banner{
+  position:absolute;white-space:nowrap;
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--borderLight);border-radius:22px;
+  padding:7px 24px;
+  box-shadow:0 4px 20px rgba(37,99,235,.1);
+  font-weight:800;font-size:.88rem;color:var(--accent);
+  animation:bannerSlide 10s ease-in-out forwards;
+  pointer-events:auto;
+}
+.banner .b-icon{font-size:1.3rem}
+.banner .b-text{display:flex;gap:6px;align-items:center}
+.banner .b-label{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-size:.65rem;font-weight:800;
+  padding:2px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:.5px;
+}
+.banner .b-title{font-weight:900;color:var(--text)}
+.banner .b-sep{color:var(--border)}
+.banner .b-desc{font-weight:600;color:var(--muted);font-size:.82rem}
+@keyframes bannerSlide{
+  0%{left:110%}
+  15%{left:50%;transform:translateX(-50%)}
+  75%{left:50%;transform:translateX(-50%)}
+  100%{left:-100%}
+}
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.25);backdrop-filter:blur(4px);z-index:99;opacity:0;pointer-events:none;transition:opacity .3s}
+.overlay.show{opacity:1;pointer-events:auto}
+.prestige-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#faf5ff,#fff);border:2px solid var(--purple);border-radius:24px;padding:36px 48px;text-align:center;z-index:101;box-shadow:0 20px 80px rgba(124,58,237,.2);transition:transform .4s cubic-bezier(.34,1.56,.64,1);max-width:400px}
+.prestige-popup.show{transform:translate(-50%,-50%) scale(1)}
+.prestige-popup h2{color:var(--purple);font-size:1.3rem;font-weight:900;margin-bottom:8px}
+.prestige-popup p{color:var(--muted);font-size:.82rem;margin-bottom:16px;line-height:1.5;font-weight:600}
+.prestige-popup .bonus{color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700;margin-bottom:16px}
+.pp-buttons{display:flex;gap:12px;justify-content:center}
+.pp-btn{padding:10px 28px;border-radius:14px;border:none;font-family:'Nunito',sans-serif;font-weight:800;font-size:.85rem;cursor:pointer;transition:all .2s}
+.pp-btn.confirm{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;box-shadow:0 4px 15px rgba(124,58,237,.2)}
+.pp-btn.confirm:hover{transform:scale(1.05);box-shadow:0 6px 25px rgba(124,58,237,.3)}
+.pp-btn.cancel{background:var(--bg2);color:var(--muted);border:1px solid var(--border)}
+.pp-btn.cancel:hover{color:var(--text);background:var(--borderLight)}
+
+/* === News ticker === */
+.news-ticker{
+  position:fixed;bottom:0;left:0;right:0;z-index:10;
+  background:rgba(255,255,255,.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-top:1px solid var(--borderLight);
+  height:32px;overflow:hidden;display:flex;align-items:center;
+}
+.news-ticker-label{
+  flex-shrink:0;padding:0 14px;font-size:.7rem;font-weight:900;
+  color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  height:100%;display:flex;align-items:center;letter-spacing:.5px;
+  text-transform:uppercase;z-index:1;
+}
+.news-ticker-track{
+  flex:1;overflow:hidden;position:relative;height:100%;
+}
+.news-ticker-content{
+  display:flex;align-items:center;gap:0;
+  position:absolute;top:0;height:100%;
+  animation:tickerScroll var(--ticker-duration,120s) linear infinite;
+  white-space:nowrap;
+}
+.news-ticker-content:hover{animation-play-state:paused}
+.news-item{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:0 36px;font-size:.94rem;font-weight:700;color:var(--textSoft);
+  height:100%;
+}
+.news-item .news-dot{color:var(--accent);font-size:.5rem}
+.news-item .news-emoji{font-size:1.2rem}
+@keyframes tickerScroll{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-50%)}
+}
+
+.upgrade.rovo-gold{
+  background:linear-gradient(135deg,#fffbeb,#fef3c7);
+  border-color:#f59e0b;
+  box-shadow:0 2px 12px rgba(245,158,11,.12);
+}
+.upgrade.rovo-gold:hover{border-color:#d97706;box-shadow:0 4px 20px rgba(245,158,11,.2)}
+.upgrade.rovo-gold .upgrade-icon{background:linear-gradient(135deg,#fde68a,#fbbf24)}
+.upgrade.luxury-item{background:linear-gradient(135deg,#fffbeb,#fff)}
+.upgrade.luxury-item .upgrade-icon{background:linear-gradient(135deg,#fef3c7,#fde68a)}
+.upgrade.luxury-item.bought{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:var(--green)}
+.upgrade.luxury-item.bought .upgrade-name{text-decoration:none;color:var(--green)}
+.upgrade.luxury-item .prestige-badge{
+  font-size:.6rem;font-weight:800;color:#b45309;
+  background:linear-gradient(135deg,#fef3c7,#fde68a);
+  padding:1px 6px;border-radius:6px;display:inline-block;margin-top:2px;
+}
+/* === Global Tooltip === */
+.game-tooltip{
+  position:fixed;z-index:200;pointer-events:none;
+  background:rgba(15,23,42,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.1);border-radius:14px;
+  padding:0.75rem 1rem;max-width:16rem;min-width:9rem;
+  box-shadow:0 12px 40px rgba(0,0,0,.25);
+  opacity:0;transform:translateY(6px);
+  transition:opacity .15s,transform .15s;
+  font-family:'Nunito',sans-serif;
+}
+.game-tooltip.visible{opacity:1;transform:translateY(0)}
+.game-tooltip-title{font-size:.78rem;font-weight:900;color:#fff;margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.game-tooltip-desc{font-size:.66rem;font-weight:600;color:rgba(255,255,255,.7);line-height:1.5}
+.game-tooltip-rule{font-size:.6rem;font-weight:700;color:#60a5fa;margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,.1);line-height:1.4}
+
+</style>
+</head>
+<body>
+
+<div class="bg-blobs">
+  <div class="blob"></div><div class="blob"></div><div class="blob"></div>
+  <div class="blob"></div><div class="blob"></div><div class="blob"></div>
+</div>
+<div class="bg-coins" id="bgCoins"></div>
+
+<div class="topbar">
+  <div class="logo">🛒 Webshop Clicker Game <span style="font-size:.5em;font-style:italic;font-weight:600;-webkit-text-fill-color:rgba(100,116,139,.6)">by Rovó Viktor · v0.122</span></div>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-label">Franchise</div><div class="stat-value" id="prestigeLvl">0 ⭐</div></div>
+    <div class="stat"><div class="stat-label">Bónusz</div><div class="stat-value" id="prestigeBonus">×1.0</div></div>
+    <div class="stat"><div class="stat-label">Kattintás</div><div class="stat-value" id="totalClicks">0</div></div>
+    <div class="stat"><div class="stat-label">Összesen</div><div class="stat-value" id="totalEarned">0 Ft</div></div>
+    <div class="stat" style="background:linear-gradient(135deg,#fef3c7,#fde68a)"><div class="stat-label" style="color:#92400e">Presztízs</div><div class="stat-value" id="prestizsValue" style="color:#b45309">0 👑</div></div>
+    <div class="luxury-icons" id="luxuryIcons"></div>
+    <button class="topbar-btn on" id="soundBtn" title="Hang ki/be">🔊</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="panel-left">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('workers')">👷 Csapat</button>
+      <button class="tab-btn" onclick="switchTab('upgrades')">⚡ Fejlesztés</button>
+      <button class="tab-btn" onclick="switchTab('luxury')">👑 Luxus</button>
+    </div>
+    <div class="tab-content active" id="tab-workers" data-tab="workers"><div id="workers"></div></div>
+    <div class="tab-content" id="tab-upgrades" data-tab="upgrades"><div id="upgrades"></div></div>
+    <div class="tab-content" id="tab-luxury" data-tab="luxury"><div id="luxury"></div></div>
+  </div>
+
+  <div class="center">
+    <div class="center-bg"></div>
+    <div class="season-box" id="seasonBox">
+      <div class="season-box-title" id="seasonTitle"></div>
+      <div class="season-box-desc" id="seasonDesc"></div>
+      <div class="season-box-mult" id="seasonMult"></div>
+      <div class="season-box-bar"><div class="season-box-fill" id="seasonFill"></div></div>
+      <div class="season-box-timer" id="seasonTimer"></div>
+    </div>
+    <div class="customer-layer" id="customerLayer"></div>
+    <div class="customer-counter" id="customerCounter">👥 Vásárlók: 0</div>
+    <div class="click-area">
+      <div class="revenue-card">
+        <div class="revenue-display" id="money">0 Ft</div>
+        <div class="revenue-label">Kassza</div>
+      </div>
+      <div class="cart-btn-wrap" id="cartWrap">
+        <button class="cart-btn" id="cartBtn">🛒</button>
+      </div>
+      <div class="per-sec" id="perSec">+0 Ft/mp</div>
+      <div class="progress-wrap">
+        <div class="progress-label" id="progressLabel">Következő: Első kattintás</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+      <button class="prestige-btn" id="prestigeBtn" onclick="confirmPrestige()">🔄 Franchise indítása</button>
+      <div class="prestige-info" id="prestigeInfo"></div>
+    </div>
+  </div>
+
+  <div class="panel-right">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchRightTab('achievements')">🏆 Célok</button>
+      <button class="tab-btn" onclick="switchRightTab('rivals')">⚔️ Riválisok</button>
+      <button class="tab-btn" onclick="switchRightTab('reviews')">⭐ Vélemények <span class="tab-badge" id="reviewBadge">0</span></button>
+    </div>
+    <div class="tab-content active" id="rtab-achievements" data-rtab="achievements"><div id="achievements"></div></div>
+    <div class="tab-content" id="rtab-rivals" data-rtab="rivals"><div id="rivals"></div></div>
+    <div class="tab-content" id="rtab-reviews" data-rtab="reviews"><div id="reviews"></div></div>
+  </div>
+</div>
+
+
+<!-- Menu -->
+<button class="menu-toggle" id="menuToggle" onclick="toggleMenu()">
+  ☰ Menü <span class="badge" id="logBadge">0</span>
+</button>
+<div class="menu-panel" id="menuPanel">
+  <div class="menu-tabs">
+    <button class="menu-tab active" onclick="switchMenuTab('settings')">⚙️ Beállítások</button>
+    <button class="menu-tab" onclick="switchMenuTab('info')">📖 Leírás</button>
+    <button class="menu-tab" onclick="switchMenuTab('log')">📋 Napló</button>
+  </div>
+  <div class="menu-page active" data-menu="settings">
+    <div class="section">
+      <h3>💾 Mentés</h3>
+      <p>A játék automatikusan ment 30 másodpercenként. Kézi mentéshez kattints az alábbi gombra.</p>
+      <div class="menu-actions">
+        <button class="menu-action-btn save" onclick="saveGame()">💾 Mentés most</button>
+      </div>
+    </div>
+    <div class="section">
+      <h3>🗑️ Játék törlése</h3>
+      <p>Véglegesen töröl mindent: pénz, alkalmazottak, fejlesztések, luxustárgyak, mérföldkövek, franchise. Nincs visszavonás!</p>
+      <div class="menu-actions">
+        <button class="menu-action-btn reset" onclick="confirmReset()">🗑️ Új játék indítása</button>
+      </div>
+    </div>
+  </div>
+  <div class="menu-page" data-menu="info">
+    <div class="section">
+      <h3>🛒 Webshop Clicker Game</h3>
+      <p>Építsd fel a saját webshop birodalmad! Kattints a kosárra, alkalmazz dolgozókat, vásárolj fejlesztéseket, győzd le a riválisokat, és legyél a magyar e-kereskedelem királya.</p>
+    </div>
+    <div class="section">
+      <h3>💰 Hogyan keress pénzt?</h3>
+      <ul>
+        <li><b>Kattintás</b> — Minden kattintás Ft-ot hoz. Alap: <span class="kbd">10 Ft</span>. Fejlesztésekkel sokszorozható.</li>
+        <li><b>Alkalmazottak (👷 Csapat tab)</b> — Automatikusan termelnek Ft/mp-et. Minél többet veszel belőlük, annál drágábbak (<span class="kbd">×1.15</span>/db).</li>
+      </ul>
+    </div>
+    <div class="section">
+      <h3>⚡ Fejlesztések</h3>
+      <p>Egyszeri vásárlások amik szorozzák a kattintásod értékét (×2, ×3, ×5...). Franchise-kor elvesznek, újra kell venni őket.</p>
+    </div>
+    <div class="section">
+      <h3>👑 Luxus & Presztízs</h3>
+      <p>24 luxustárgy vásárolható a Luxus tabról. Mindegyik presztízs pontokat ad — ezek mutatják mennyire sikeres a vállalkozásod. A megvásárolt tárgyak ikonjai a felső sávban jelennek meg arany kapszulában.</p>
+      <p>🔑 A luxustárgyak franchise-kor <b>NEM</b> vesznek el!</p>
+    </div>
+    <div class="section">
+      <h3>🔄 Franchise rendszer</h3>
+      <p>Ha eléred a <span class="kbd">10M Ft</span> összbevételt, franchise-t indíthatsz. Ez nullázza a pénzed, alkalmazottaid és fejlesztéseid, DE permanens szorzót kapsz minden jövőbeli bevételre.</p>
+      <p>Szorzók: <span class="kbd">×1.5</span> → <span class="kbd">×2.0</span> → <span class="kbd">×2.5</span> → ...</p>
+      <p>✅ Megmarad: mérföldkövek, luxustárgyak, presztízs, legyőzött riválisok</p>
+      <p>❌ Elveszik: pénz, alkalmazottak, fejlesztések</p>
+    </div>
+    <div class="section">
+      <h3>⚔️ Rivális webshopok</h3>
+      <p>20 versenytárs webshop vár rád, egyre erősebbek. Ha a te Ft/mp-ed meghaladja az övékét, legyőzted őket! A Riválisok tabról követheted a haladásod.</p>
+      <p>A legyőzött riválisok zölden jelennek meg, a következő célpont kéken, %-os progressal.</p>
+    </div>
+    <div class="section">
+      <h3>🗓️ Szezonális bónuszok</h3>
+      <p>Véletlenszerűen 60-120 mp-enként aktiválódik egy szezon (pl. ☀️ Nyári Leárazás, 🎄 Karácsonyi Láz, 📦 Black Friday). Ilyenkor <b>minden bevételed szorzódik</b> — kattintás és alkalmazottak is.</p>
+      <p>A játéktér jobb felső sarkában sárga dobozban látod az aktív szezont és a visszaszámláló csíkot.</p>
+    </div>
+    <div class="section">
+      <h3>⭐ Vásárlói vélemények</h3>
+      <p>Automatikusan érkeznek kamu review-k a webshopodról. A vélemények minősége a bevételeddel együtt javul — eleinte 1-2 csillagos szidások, később 5 csillagos rajongók!</p>
+      <p>Új véleménynél hangjelzés + piros badge jelzi a Vélemények tabon.</p>
+    </div>
+    <div class="section">
+      <h3>🏆 Mérföldkövek</h3>
+      <p>Kattintás, bevétel, alkalmazotti létszám, franchise szint és konzultációk alapján oldhatók fel. A progress bar mindig a következő mérföldkövet mutatja.</p>
+    </div>
+    <div class="section">
+      <h3>👥 Vásárlók</h3>
+      <p>Animált vásárlók sétálnak át a játéktéren. Minél több alkalmazottad van, annál sűrűbben jönnek. A vásárlók számát a képernyő alján követheted.</p>
+    </div>
+    <div class="section">
+      <h3>📰 Álhírek</h3>
+      <p>A képernyő alján 222 abszurd magyar e-kereskedelmi hír fut végtelen szalagban. Csak szórakoztatás — egyik sem igaz (valószínűleg).</p>
+    </div>
+    <div class="section">
+      <h3>💾 Mentés</h3>
+      <p>A játék <b>automatikusan ment 30 mp-enként</b>. Kézi mentés a Beállítások tabról. A mentés a böngésző localStorage-ában tárolódik.</p>
+    </div>
+    <div class="section">
+      <h3>💡 Tippek</h3>
+      <ul>
+        <li>A konzultáció Rovó Viktorral az egyik legjobb befektetés — magas hozam és saját mérföldkövei vannak!</li>
+        <li>Szezon alatt érdemes sokat kattintani a szorzó miatt.</li>
+        <li>A Franchise szorzó permanens — minél többször indítod, annál erősebb vagy.</li>
+        <li>Bármire viszed az egered, tooltip jelenik meg a részletekkel!</li>
+      </ul>
+    </div>
+  </div>
+  <div class="menu-page" data-menu="log">
+    <div id="log"></div>
+  </div>
+</div>
+
+<!-- News ticker -->
+<div class="news-ticker">
+  <div class="news-ticker-label">📰 ÁLHÍREK</div>
+  <div class="news-ticker-track">
+    <div class="news-ticker-content" id="tickerContent"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="banner-track" id="bannerTrack"></div>
+<div class="prestige-popup" id="prestigePopup">
+  <h2>🔄 Franchise indítása</h2>
+  <p>Újrakezded a játékot, de minden bevételed <b>permanens szorzót</b> kap!</p>
+  <div class="bonus" id="ppBonus"></div>
+  <p style="font-size:.72rem">Minden alkalmazott és fejlesztés elvész, de a mérföldköveid megmaradnak.</p>
+  <div class="pp-buttons">
+    <button class="pp-btn cancel" onclick="closePrestige()">Mégsem</button>
+    <button class="pp-btn confirm" onclick="doPrestige()">Indítás!</button>
+  </div>
+</div>
+
+<div class="game-tooltip" id="gameTooltip">
+  <div class="game-tooltip-title" id="ttTitle"></div>
+  <div class="game-tooltip-desc" id="ttDesc"></div>
+  <div class="game-tooltip-rule" id="ttRule"></div>
+</div>
+
+<script>
+// === INTENSE Background ===
+(function(){
+  const emojis=['💰','🪙','💵','📦','🛍️','🎁','💳','🛒','🚀','💎','👑','🏦','📈','🤑','🎰'];
+  const c=document.getElementById('bgCoins');
+  for(let i=0;i<25;i++){
+    const d=document.createElement('div');d.className='bg-coin';
+    d.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    d.style.left=Math.random()*100+'%';
+    d.style.fontSize=(1.2+Math.random()*2)+'rem';
+    d.style.animationDuration=(10+Math.random()*20)+'s';
+    d.style.animationDelay=(-Math.random()*25)+'s';
+    c.appendChild(d);
+  }
+})();
+
+// Surprise events
+const surpriseEmojis=['🚀','💎','👑','🤑','🎉','🦄','🌈','🎰','💸','🏆','🎪','🤯','🫠','😱','💀','🔥','🍕','👽','🐸','🦊'];
+const megaEmojis=['🤑','💸','🚀','👑','🦄','🌈','🎰','🤯'];
+
+function spawnSurpriseEmoji(){
+  const el=document.createElement('div');el.className='surprise-emoji';
+  el.textContent=surpriseEmojis[Math.floor(Math.random()*surpriseEmojis.length)];
+  el.style.setProperty('--sx',(Math.random()*80+10)+'vw');
+  el.style.setProperty('--sy',(Math.random()*80+10)+'vh');
+  el.style.setProperty('--ex',(Math.random()*80+10)+'vw');
+  el.style.setProperty('--ey',(Math.random()*80+10)+'vh');
+  document.body.appendChild(el);setTimeout(()=>el.remove(),2500);
+}
+
+function spawnShootingStar(){
+  const el=document.createElement('div');el.className='shooting-star';
+  const angle=-30+Math.random()*-30;
+  el.style.setProperty('--sx2',(Math.random()*100)+'vw');
+  el.style.setProperty('--sy2',(Math.random()*50)+'vh');
+  el.style.setProperty('--dx2',(300+Math.random()*400)+'px');
+  el.style.setProperty('--dy2',(150+Math.random()*200)+'px');
+  el.style.setProperty('--angle',angle+'deg');
+  el.style.width=(60+Math.random()*80)+'px';
+  document.body.appendChild(el);setTimeout(()=>el.remove(),1200);
+}
+
+function spawnConfettiBurst(){
+  const colors=['#2563eb','#3b82f6','#60a5fa','#a855f7','#ec4899','#10b981','#f59e0b','#f43f5e'];
+  const cx=Math.random()*80+10,cy=Math.random()*60+10;
+  for(let i=0;i<30;i++){
+    const c=document.createElement('div');c.className='confetti';
+    c.style.left=cx+'vw';c.style.top=cy+'vh';
+    c.style.background=colors[Math.floor(Math.random()*colors.length)];
+    c.style.width=(4+Math.random()*8)+'px';c.style.height=(4+Math.random()*8)+'px';
+    c.style.borderRadius=Math.random()>.5?'50%':'2px';
+    const a=Math.random()*Math.PI*2,d=80+Math.random()*200;
+    c.style.setProperty('--cx',Math.cos(a)*d+'px');
+    c.style.setProperty('--cy',(Math.sin(a)*d-100)+'px');
+    document.body.appendChild(c);setTimeout(()=>c.remove(),3000);
+  }
+}
+
+function spawnMegaSpin(){
+  const el=document.createElement('div');el.className='mega-spin';
+  el.textContent=megaEmojis[Math.floor(Math.random()*megaEmojis.length)];
+  document.body.appendChild(el);setTimeout(()=>el.remove(),3000);
+}
+
+// Random background events
+function randomBgEvent(){
+  const r=Math.random();
+  if(r<.3) spawnSurpriseEmoji();
+  else if(r<.5) spawnShootingStar();
+  else if(r<.7){spawnSurpriseEmoji();spawnSurpriseEmoji()}
+  else if(r<.85) spawnConfettiBurst();
+  else{spawnMegaSpin();spawnConfettiBurst()}
+}
+setInterval(randomBgEvent,2500+Math.random()*2000);
+// Also on clicks (every 5th)
+let clickEventCounter=0;
+
+// === Fake ecom news ticker ===
+(function(){
+  const news=[
+    {e:'🚨',t:'BREAKING: Férfi 47 böngészőfülről rendelt egyszerre, felesége válópert indított'},
+    {e:'📦',t:'Csomagpont betelt Szolnokon — helyiek sátrat vertek a gép elé, kialakult egy kis település'},
+    {e:'🛒',t:'Kutatás: az „Azonnal megrendelem" gomb 300%-kal hatékonyabb hajnali 2-kor, pálinka után'},
+    {e:'💳',t:'Magyar férfi 11. hónapja fizet részletre egy 2000 Ft-os párnát — még mindig nem tudja miért vette meg'},
+    {e:'🤖',t:'AI chatbot véletlenül 4000 darab WC-papírt rendelt egy nyugdíjasnak — a bácsi boldogan épít belőle garázst'},
+    {e:'📈',t:'Webshop forgalom rekord: Black Friday-en 3 másodpercig ingyen volt minden — összeomlott az ország'},
+    {e:'🔥',t:'Influencer véletlenül saját webshopját égette le egy „őszinte" reviewban — a nézettség viszont triplázódott'},
+    {e:'🏷️',t:'Felmérés: a vásárlók 94%-a „csak nézelődik" de mégis 3 csomaggal és üres bankszámlával távozik'},
+    {e:'👀',t:'Egy amerikai milliárdos irigyen figyeli a te webshopod növekedését — állítólag sír esténként'},
+    {e:'🐌',t:'Futár a Bermuda-háromszögben tűnt el a csomagoddal — a nyomozás 3. éve tart, a csomag „úton van"'},
+    {e:'💸',t:'Kupon-függő nő 47 000 Ft-ot spórolt, de 380 000 Ft-ot költött közben — „megérte" nyilatkozta boldogan'},
+    {e:'🎰',t:'Hatóság vizsgálja: webshop kosár gomb szerencsejátéknak minősül-e, mert a vásárlók mindig veszítenek'},
+    {e:'🧠',t:'Rovó Viktor konzultáció után webshop tulajdonos bevétele 900%-kal nőtt (nem reklám) (de tényleg nem)'},
+    {e:'🦊',t:'Ravasz vásárló 16 email címmel gyűjtötte az „első rendelés" kupont — a rendszer megtapsolta'},
+    {e:'📱',t:'Nagymama véletlenül a telefonon rendelt unokájának traktort — megérkezett, a gyerek 3 éves, a kertbe nem fér'},
+    {e:'🚀',t:'Startup 4 milliárdot kapott egy appra ami emlékeztet hogy ne rendelj — senki nem használja'},
+    {e:'🍕',t:'Pizzafutár mellékesen 12 webshop csomagot is kézbesít — a szalámis pizzák néha összecserélődnek a billentyűzetekkel'},
+    {e:'😱',t:'Webshop tulaj rájött hogy legnagyobb vásárlója a saját anyósa volt — 3 éve bosszúból rendel'},
+    {e:'🏦',t:'Jegybank figyelmeztet: „Kosárba rakom" nem számít befektetési döntésnek, hiába érzed úgy'},
+    {e:'👑',t:'Magyar webshop mogul villát vett Dubajban — kiderült csak a demó shopból élt és a villa is demó'},
+    {e:'🎁',t:'Ingyenes szállítás 50 000 Ft felett — vásárló 49 999 Ft-ért hozzáadott egy kést, két villát és egy jégtörőt'},
+    {e:'💀',t:'Webshop checkout oldal olyan hosszú hogy vásárló közben elaludt, felkelt, reggelizett és újra elaludt'},
+    {e:'🤑',t:'Dropshipper eladott egy tollat 8000 Ft-ért — a vevő 5 csillagot adott mert „gyönyörű csomagolás"'},
+    {e:'🧓',t:'72 éves bácsi keresőbe beírta: „kérem szépen egy kiló kenyeret" — kapott 300 találatot, sírva telefonált az unokának'},
+    {e:'🐕',t:'Kutya ráült a laptopra, 17 darab kutyaágyat rendelt — a gazda büszke, a kutya egyben sem alszik'},
+    {e:'🧊',t:'Webshop jégkrémet szállít Szaharába — meglepően nagy a kereslet, a kézbesítés viszont hagy kívánnivalót'},
+    {e:'🎭',t:'Álruhás futár kiderült hogy a szomszéd volt aki 2 éve lopja a csomagokat — a rendőrség gratulált a jelmezhez'},
+    {e:'🏃',t:'Futár maratoni világrekordot döntött miközben 3 csomagot kézbesített — a csomagok nem értek oda'},
+    {e:'🧲',t:'Új funkció: a webshop kosár mágnesesen vonzza a bankkártyádat — fizikailag is, közeledik a monitor felé'},
+    {e:'🦷',t:'Fogorvos webshopot nyitott — minden termék mellé jár egy ingyenes tömés, a páciensek online rendelnek fogat'},
+    {e:'🌮',t:'Taco webshop összeomlott miután egy híresség tweetelt róla — a szerver szó szerint megolvadt'},
+    {e:'🎪',t:'Cirkusz nyitott webshopot — a bohócok csomagolnak, a vevők sírnak (állítólag az örömtől)'},
+    {e:'🐝',t:'Méhész webshop: a csomagolásban néha élő méh is van — a GYIK szerint ez „prémium élmény"'},
+    {e:'🧑‍🚀',t:'Űrhajós az űrállomásról rendelt — szállítási díj: 47 milliárd Ft, szállítási idő: „megoldjuk"'},
+    {e:'🦆',t:'Gumikacsa webshop a tőzsdére megy — elemzők optimisták, a kacsák is'},
+    {e:'🎸',t:'Gitár webshop vásárlóinak 89%-a nem tud gitározni — de a kosár tele van és az álmaik is'},
+    {e:'🧀',t:'Sajt webshop bezárt mert a raktáros 3 tonna trappistát evett meg szabadságon — „minőségellenőrzés" volt'},
+    {e:'🌂',t:'Esernyő webshop forgalma 0 Ft esős napokon — mindenki már otthon van és onnan rendel törölközőt'},
+    {e:'🐈',t:'Macska webshop: a legtöbbet rendelt termék az üres doboz — 5 csillag, „a cica imádja, a tartalmat kidobtam"'},
+    {e:'🧦',t:'Zokni webshop CEO lemondott miután rájött hogy 3 éve mindig páratlan darabot szállítanak — senki nem szólt'},
+    {e:'🎯',t:'Célzott hirdetés annyira pontos volt hogy a vásárló megijedt és kiköltözött az erdőbe'},
+    {e:'🍌',t:'Banán webshop: a szállítási idő kritikus — 2 nap késés = barna banán, 3 nap = banánkenyér'},
+    {e:'🧸',t:'Plüssmaci webshop véletlenül 2 méteres mackót küldött — a gyerek imádja, a szülők a nappaliban laknak'},
+    {e:'🔑',t:'Webshop jelszó-visszaállító emailt küldött — 47-szer egymás után, a spamszűrő terápiára jár azóta'},
+    {e:'🗿',t:'Vásárló 1 csillagot adott mert a csomag 1 perccel később érkezett — 4 oldalas esszét írt hozzá'},
+    {e:'🎩',t:'Elegáns webshop: minden csomag frakkban érkezik, a futárnak kötelező monoklit viselni'},
+    {e:'🦩',t:'Flamingó figurákat áruló webshop értékesebb mint 3 hazai bank — a flamingók nem nyilatkoztak'},
+    {e:'🧯',t:'Tűzoltó riadó a raktárban: begyulladt a „forró akció" szekció — a tűzoltók 30%-os kedvezményt kaptak'},
+    {e:'🎬',t:'Dokumentumfilm készül a magyar e-kereskedelem hőseiről — a rendező közben rendelést adott le'},
+    {e:'🐸',t:'Béka figurákat áruló webshop részvénye 4000%-ot emelkedett egy mém miatt — a békák hallgatnak'},
+    {e:'🧑‍💻',t:'Fejlesztő véletlenül élesbe pusholta a „teszt rendelés" gombot — 8000 rendelés 40 másodperc alatt'},
+    {e:'🦷',t:'Fogkefe webshop: minden 10. vásárló kap motivációs üzenetet — „Moss fogat, ne csak rendelj!"'},
+    {e:'🧳',t:'Bőrönd webshop bezárt mert az összes bőröndöt bőröndben szállították — a rekurzió végzett velük'},
+    {e:'🍩',t:'Fánk webshop AI ajánlórendszere mindenkinek fánkot ajánl — hatékonysága 100%, a dietetikusok tiltakoznak'},
+    {e:'🐔',t:'Tyúk webshop: a tyúk vagy a tojás érkezett előbb? — 3 hónapja tart a logisztikai vizsgálat'},
+    {e:'🎻',t:'Hangszer webshop hegedűvel szállít — a futár minden ajtónál eljátszik egy dallamot, a szomszédok költöznek'},
+    {e:'🧪',t:'A/B teszt kimutatta: a piros gomb jobb — a designer azóta minden pirosra festi, beleértve a céges autót'},
+    {e:'🌭',t:'Hot dog webshop: ketchup vagy mustár? — a kommentszekció 4700 hozzászólásnál tart, nincs megoldás'},
+    {e:'🦑',t:'Tengeri állat webshop: a polip 8 csomagot tud egyszerre becsomagolni, már fizetésemelést kért'},
+    {e:'📺',t:'Retró webshop: minden termékleírás fekete-fehérben — a hipszterek 3 órát várnak sorban a hozzáférésért'},
+    {e:'🎢',t:'Webshop UX annyira bonyolult hogy a felhasználói út hullámvasútnak minősül — jegyárat fontolgatnak'},
+    {e:'🧑‍🍳',t:'Szakács webshop: ha nem rendelsz 24 órán belül, egy profi séf személyesen hív és szid'},
+    {e:'💡',t:'Villanykörtét áruló webshop szlogenje: „Nálunk mindig világos" — éjjel a szerver leáll'},
+    {e:'🦄',t:'Unikornis webshop: nem létezik, de a landing page-nek 2M követője van és már bevételt termel'},
+    {e:'🧲',t:'A „Neked ajánljuk" szekció annyira pontos hogy egy vásárló egzisztenciális válságba került tőle'},
+    {e:'🎵',t:'Webshop bevezetett hanghatásokat — a „Kosárba" gomb trombita hangot ad, az irodában senki nem bírja'},
+    {e:'🐧',t:'Pingvin webshop télen megy, nyáron fagylaltot árul — az üzleti terv egy szalvétán fér el'},
+    {e:'🧃',t:'Gyerek webshop: a szülők 4x annyit költenek mint amennyit terveztek — az alkalmazottak ezt „szülő-adónak" hívják'},
+    {e:'🎤',t:'Karaoke webshop: ha 5 csillagos értékelést énekelsz be, 10% kedvezményt kapsz — a szomszédok tiltakoznak'},
+    {e:'🧠',t:'Rovó Viktor új könyve: „Hogyan lettem milliárdos konzultációkból" — 3 hét alatt bestseller, a könyvesek tanácstalanok'},
+    {e:'🌙',t:'Éjjeli webshop akciók: hajnali 3-kor 500%-kal nő a fölösleges vásárlás — az orvosok aggodalmukat fejezték ki'},
+    {e:'🧊',t:'Jégkocka webshop: a szállítás napsütésben „kreatív kihívás" — a vevők vizet kapnak'},
+    {e:'🦥',t:'Lajhár postával szállító webshop: 3-47 munkanap szállítási idő — a türelmes vásárlókat díjazzák'},
+    {e:'🎓',t:'Egyetemi tanulmány: a webshop kosár elhagyása nagyobb trauma mint a szakítás — a pszichológusok bólogatnak'},
+    {e:'🧑‍🔬',t:'Tudósok kimutatták: az „Utolsó darab!" felirat 97%-ban hazugság — a másik 3% elírás'},
+    {e:'🪤',t:'Pop-up ablak csapdába esett egy felhasználó — 45 percig nem tudott kilépni, közben 3-szor rendelt'},
+    {e:'🐻',t:'Mackó webshop: a plüssökbe GPS-t tesznek hogy a gyerekek mindig megtalálják — a szülők is nyomon követhetők'},
+    {e:'🎪',t:'Webshop ügyfélszolgálat bűvészmutatványokat vezet be a várakozási időben — a reklamáció szórakoztatóbb lett'},
+    {e:'🗳️',t:'Országos népszavazás: ingyenes szállítás legyen alapjog? — 94% igennel szavazott, a futárok sztrájkolnak'},
+    {e:'🧁',t:'Muffin webshop AI-ja megjósolja milyen muffint akarsz holnap — ijesztően pontos, a titkosszolgálat érdeklődik'},
+    {e:'🐉',t:'Sárkány figurákat áruló webshop: a tűzbiztosítás háromszorosa a bevételnek, de a rajongók kitartanak'},
+    {e:'🎾',t:'Teniszlabda webshop: minden 100. rendeléssel jár egy aláírt fotó a raktárosról — senki nem kérte'},
+    {e:'🧲',t:'SEO szakértő annyira jól optimalizált hogy a webshop rákeresésre is magát ajánlja — az algoritmus megadta magát'},
+    {e:'🦜',t:'Papagáj webshop chatbotja megtanulta a papagáj beszédet — minden kérdésre a kérdéssel válaszol'},
+    {e:'🍿',t:'Popcorn webshop: minden csomag tetején filmajánló — „ezért rendelted a pattogatottat, ugye?"'},
+    {e:'🧑‍🚒',t:'Webshop szerver Black Friday-en túlterhelődött — a tűzoltóság „technikai segítséget" nyújtott: leöntötték vízzel'},
+    {e:'🪁',t:'Sárkányrepülő webshop: szállítás szélcsendes napokon szünetel — a vásárlók fújják a szelet'},
+    {e:'🎰',t:'Webshop nyerőgépet épített a kosárba — ha 3 cseresznye jön, 50% kedvezmény, ha nem: dupla áron viszed'},
+    {e:'🦔',t:'Süni webshop: a csomagolás szúrós — a futárok kesztyűben dolgoznak és bátorságpótlékot kapnak'},
+    {e:'🧑‍🎨',t:'Webshop dizájner felmondott mert a CEO ragaszkodott a Comic Sans-hoz — búcsúlevele is Comic Sans-ban volt'},
+    {e:'🍄',t:'Gomba webshop: a raktárban magától nőnek új termékek — fenntartható, de a raktáros fél bemenni'},
+    {e:'🔮',t:'Jósnő webshopot nyitott — minden rendelés mellé jár egy jóslat, többnyire „még fogsz rendelni"'},
+    {e:'🧠',t:'Rovó Viktor webinár: „Ne kattints, amíg nincs stratégiád" — 50 000 néző kattintott azonnal'},
+    {e:'🐋',t:'Bálna méretű csomagot szállított a futár — kiderült csak egy egérpad volt benne, nagyon jól becsomagolva'},
+    {e:'🎂',t:'Torta webshop: minden rendelés 30 perccel a szülinap UTÁN érkezik — immár hagyomány'},
+    {e:'🧑‍⚖️',t:'Bíróság: a „Csak ma!" felirat jogszerű ha minden nap kiírják — precedens ítélet, az ügyvédek ünnepelnek'},
+    {e:'🦋',t:'Pillangó hatás: egy külföldi webshop árat emelt, Debrecenben kifogyott a paprika — senki nem érti'},
+    {e:'🎿',t:'Sí webshop nyáron 99%-os akció — senki nem veszi, de az analytics-csapat boldogan mutogatja a grafikonokat'},
+    {e:'🧑‍🏫',t:'Webshop UX workshop: a résztvevők 3 óra után sem találták a „Fizetés" gombot — a szervező büszke'},
+    {e:'🐙',t:'Polip mintás pólókat áruló webshop: 8 méret, 8 szín, 8 millió kombináció — a raktáros felmondott'},
+    {e:'🎺',t:'Webshop értesítések hangja: harsonaszó — a szomszédok petíciót írtak, a vásárlók imádják'},
+    {e:'🧊',t:'Hűtőszekrény webshop: a terméket magából a hűtőből szállítják — ez a meta, mondta a CEO, majd kirúgták'},
+    {e:'🦁',t:'Oroszlán figurákat áruló webshop: a konkurencia szó szerint fél tőlük — az iroda ajtaján oroszlánfejes kopogtató van'},
+    {e:'🎭',t:'Webshop A/B tesztet futtatott a 404-es oldalon — az lett a legnézettebb, legkedveltebb oldal'},
+    {e:'🧑‍🔧',t:'Webshop karbantartáskor véletlenül mindent 1 Ft-ra áraztak — 3 perc alatt elfogyott az ország készlete'},
+    {e:'🌋',t:'Vulkán webshop: ha nem fizetsz 24 órán belül, emailben „kitörés" — a subject: LÁÁÁVA'},
+    {e:'🐝',t:'Méz webshop: a vásárlók szó szerint ragaszkodnak a termékhez — az ügyfélszolgálat ragasztóoldót oszt'},
+    {e:'🎡',t:'Webshop óriáskereket épített a raktár tetejére — a dolgozók imádják, a statikus mérnök kevésbé'},
+    {e:'🧬',t:'DNS-teszt webshop kiderítette: a vásárlók 43%-a genetikailag impulzusvásárló — az érintettek bólogattak'},
+    {e:'🦃',t:'Hálaadásnál összeomlott a pulyka webshop — az egész világ rendelt, a pulykák sztrájkoltak'},
+    {e:'🧲',t:'Webshop kosárba automatikus „biztos nem kell még valami?" funkció — a válasz mindig igen, a bankszámla mindig sír'},
+    {e:'🦧',t:'Orangután kezelte az ügyfélszolgálatot 3 hétig — az elégedettség 40%-kal nőtt a humán kollégákhoz képest'},
+    {e:'🧊',t:'Fagyasztott pizza webshop: a futár felengedett pizzát hozott — „kreatív értelmezés" nyilatkozta a cég'},
+    {e:'🎪',t:'Webshop CEO bohócnak öltözött az éves közgyűlésen — a részvényesek azt hitték ez a stratégia'},
+    {e:'🐜',t:'Hangyafarm webshop: a csomag kinyílt szállítás közben — a futár azóta vakaródzik'},
+    {e:'🧃',t:'Gyerek webshop jelszava kiszivárgott: „admin123" — 847 000 gyerek rendelt ingyen legót'},
+    {e:'🎸',t:'Webshop bevezetett háttérzenét — 3 perc után mindenki vásárol, 5 perc után mindenki fejhallgatót keres'},
+    {e:'🐊',t:'Krokodilbőr pénztárca webshop: a GYIK leggyakoribb kérdése: „A krokodil túlélte?" Válasz: „Következő kérdés"'},
+    {e:'🏋️',t:'Konditerem webshop: a 2 kg-os súlyzópárt 47 kg-os csomagban küldték — „ez az edzés része"'},
+    {e:'🧻',t:'WC-papír webshop 2020-ban lett milliárdos — azóta a CEO arany vécén ül'},
+    {e:'🎯',t:'Webshop A/B tesztelt egy felugró ablakot — az A verzió idegesítő volt, a B is, a C-t már senki nem várta meg'},
+    {e:'🐸',t:'Békahangú chatbot annyira népszerű lett hogy saját podcastot indított — heti 200 000 hallgató'},
+    {e:'🧁',t:'Sütemény webshop: a raktáros „minőségellenőrzésre" hivatkozva napi 4 tortát eszik meg — a HR tehetetlen'},
+    {e:'🦩',t:'Flamingó lábú asztal webshop: a termék 1 lábon áll — a vásárlók is, döbbenetükben'},
+    {e:'🎭',t:'Webshop ügyfélszolgálatos stand-up comedyre váltott — a reklamáció most a legjobb szórakozás'},
+    {e:'🧲',t:'Mágnes webshop: a csomagok mindig egymáshoz ragadnak szállítás közben — logisztikai rémálom, fizikai csoda'},
+    {e:'🐕‍🦺',t:'Vakvezető kutya webshop: a kutya személyesen kézbesít — soha nem téved el, az emberek mindig'},
+    {e:'🏺',t:'Antik váza webshop: „törékeny" felirat ellenére focilabdaként csomagolták — meglepő módon túlélte'},
+    {e:'🧑‍🎤',t:'Rockzenész webshop: minden rendelés mellé jár egy 3 perces gitárszóló a telefonon — lemondani nem lehet'},
+    {e:'🦠',t:'Baktérium webshop mikrobiológusoknak: a csomagolás steril, a marketing vírusos'},
+    {e:'🎰',t:'Webshop lottót indított: minden 1000. vásárló nyer egy újabb vásárlási lehetőséget — a nyeremény a vásárlás'},
+    {e:'🧊',t:'Jégszobor webshop: szállítás télen 2 nap, nyáron „loccs" — a visszaküldési politika képlékeny'},
+    {e:'🏠',t:'Bútor webshop: az összeszerelési útmutató 47 oldalas — 3 ember sírva hívta a szerelőt'},
+    {e:'🦔',t:'Süni webshop: a csomagolóanyag a süni maga — élő kézbesítés, extra ölelés nélkül'},
+    {e:'🧑‍🔬',t:'Laboratóriumi webshop: kémcsőben szállítják az italokat — a bor PhD-s, a sör mesterdiplomás'},
+    {e:'🎻',t:'Webshop várakozási zenéje Vivaldi Négy Évszak — a vásárlók a Nyár közepén adják fel'},
+    {e:'🐄',t:'Tehéntej webshop: a tehén személyesen írja alá a számlát — patanyomattal'},
+    {e:'🧹',t:'Takarítószer webshop: a raktár paradox módon mindig koszos — az alkalmazottak mindent eladnak'},
+    {e:'🦅',t:'Sas webshop: drónos kézbesítés helyett élő sasmadár viszi a csomagot — a macskák rettegnek'},
+    {e:'🎪',t:'Cirkuszi kellék webshop: a bohócorr az ötödik legkelendőbb termék az országban — ki veszi a többit?'},
+    {e:'🧊',t:'Iglu webshop: kiszállítás csak -10°C alatt — Magyarországon évente 4 munkanapjuk van'},
+    {e:'🐢',t:'Teknős webshop: a szállítás lassú de megbízható — a futár a teknős, a csomag a páncélon'},
+    {e:'🎤',t:'Webshop podcast indult: „Add a kosárba és sírj" — az ország legnépszerűbb pénzügyi műsora'},
+    {e:'🧲',t:'Webshop algoritmus annyira okos lett hogy előbb rendel mint a vásárló — 93%-ban eltalálja'},
+    {e:'🦜',t:'Papagáj személyesen olvassa fel a rendelés visszaigazolást — a vásárlók szerint „motiváló"'},
+    {e:'🎩',t:'Cilinder webshop: minden vásárló automatikusan VIP — a definíció „Van Igen Pénze?"'},
+    {e:'🧑‍🍳',t:'Konyhai eszköz webshop: a spatula leírása 3 oldalas esszé — a szerző nyert irodalmi díjat'},
+    {e:'🐝',t:'Méhviasz webshop: a csomagolás ehető — a vásárlók 30%-a megette, mielőtt kinyitotta'},
+    {e:'🏄',t:'Szörf webshop télen működik — a vásárlók optimisták, a szörfök a garázsban'},
+    {e:'🧩',t:'Puzzle webshop: a rendelés maga is puzzle — először ki kell rakni a számlát, aztán jön a termék'},
+    {e:'🎡',t:'Webshop bevezette a „kalandos szállítást" — nem tudod mikor jön, nem tudod hová megy, de izgalmas'},
+    {e:'🦇',t:'Éjszakai webshop: 22:00 után aktiválódik, a designt denevér tervezte — állítólag'},
+    {e:'🧑‍⚖️',t:'Bíróság kimondta: „Még 1 perc és bezárom" elfogadható vásárlási nyomásgyakorlás'},
+    {e:'🐳',t:'Bálna méretű buborékfólia webshop: a termék is buborékfólia, a csomagolás is — incepcfólia'},
+    {e:'🎓',t:'PhD dolgozat: „A kosár elhagyás pszichológiája" — a bíráló a védés közben elhagyta a kosarat'},
+    {e:'🧲',t:'Hűtőmágnes webshop: a rendelések mindig a hűtőhöz ragadnak kézbesítés után — feature'},
+    {e:'🦊',t:'Róka webshop: a visszaküldés politikája „ravasz" — senki nem érti, de mindenki elfogadja'},
+    {e:'🎪',t:'Zsonglőr webshop: 3 csomagot egyszerre dob a futár — eddig 2 reklamáció és 1 cirkuszi szerződés'},
+    {e:'🧊',t:'Fagyasztott joghurt webshop: nyáron a szállítás versenyfutás az idővel — télen senki nem rendel'},
+    {e:'🐍',t:'Gumikígyó webshop: a csomagból ugrott ki — 14 szívroham, 0 reklamáció, mert „vicces volt"'},
+    {e:'🧑‍💻',t:'Webfejlesztő webshopja: a kosár gomb CSS-ben van elrejtve — csak fejlesztők tudnak rendelni'},
+    {e:'🎵',t:'Webshop jingle annyira fülbemászó hogy betiltották a tömegközlekedésen — dudolás: max 500 Ft bírság'},
+    {e:'🦕',t:'Dinoszaurusz webshop: a termékek 65 millió évesek — a szavatossági idő „rugalmas"'},
+    {e:'🧑‍🎨',t:'Műalkotás webshop: a 404-es oldalt kiállították a Ludwigban — elkelt 2 millióért'},
+    {e:'🏖️',t:'Strandlabda webshop télen bezár — a CEO Balin telel, a labdák szomorúak'},
+    {e:'🧲',t:'Okos webshop megtanult alkudni — a vásárló 10% kedvezményt kért, a bot 15%-ot ajánlott, mindketten zavarba jöttek'},
+    {e:'🦎',t:'Kaméleon webshop: a honlap színe a vásárló hangulatához igazodik — szomorú napokon minden szürke és akciós'},
+    {e:'🎳',t:'Bowling webshop: 10 teke rendelés esetén jár 1 golyó ingyen — senki nem kérdezte miért, mindenki rendelt'},
+    {e:'🧑‍🏫',t:'Webshop oktatási programot indított: „Hogyan ne vásárolj feleslegesen" — a kurzust megvásárolta 80 000 ember'},
+    {e:'🐷',t:'Malacpersely webshop: a legtöbb vásárló azért veszi hogy legyen hova tenni a pénzt amit a webshopban költ'},
+    {e:'🎺',t:'Kürt webshop: minden rendelés után fanfárt fúj a futár — a társasház 3 alkalommal hívta a rendőrséget'},
+    {e:'🧊',t:'Jégkorszak-témájú webshop: a szerver szó szerint befagyott — ironikus, mondta a technikus, majd felmondott'},
+    {e:'🦉',t:'Bagoly webshop: csak éjjel működik — a rendelések 94%-a hajnali 3-kor jön, pizsamában, félálomban'},
+    {e:'🎨',t:'Festék webshop: a termékminta mindig más színt mutat a monitoron — a festő sír, a webshop nevet'},
+    {e:'🧑‍🚀',t:'Webshop csomagot küldtek az űrbe marketingből — a csomag visszajött, értékelés: „Gravitáció: 1/5"'},
+    {e:'🐑',t:'Birka webshop: a vásárlók követik egymást — ha egy rendel, 47 másik is azonnal rendel'},
+    {e:'🎢',t:'Extrém sport webshop: a szállítási feltételek elfogadása maga is extrém sport — 18 oldal apró betű'},
+    {e:'🧑‍🔧',t:'Webshop szerviz: a „javítás alatt" oldal szebb lett mint a webshop — ott hagyták'},
+    {e:'🦈',t:'Cápa webshop: az akciók „falánkak" és „kíméletlenek" — a vásárlók mégis beleharapnak'},
+    {e:'🎤',t:'Webshop értékelési rendszer: 6 csillag a maximum — senki nem tudja miért, de mindenki akar hatot'},
+    {e:'🧊',t:'Hóesés-érzékelő webshop: ha havazik, minden 50% kedvezmény — a meteorológusok a legjobb ügyfelek'},
+    {e:'🐈‍⬛',t:'Fekete macska webshop: pénteken nem szállítanak — babonából, nem logisztikából'},
+    {e:'🧑‍🎓',t:'Webshop szakot indítottak az egyetemen — a diplomamunka: „Miért vettem 4 kg-nyi gyertyát hajnali 2-kor?"'},
+    {e:'🦤',t:'Dodó webshop: kihalt termékek archívuma — rendelni nem lehet, de nézni ingyen van, és sírni is'},
+    {e:'🎸',t:'Légitár webshop: a terméket nem küldik el, de a számla valódi — modern művészet'},
+    {e:'🧲',t:'Webshop bevezetett „megbánás gombot" — visszavonja az utolsó rendelést, de közben sajnáltatja'},
+    {e:'🐌',t:'Csiga webshop: expressz szállítás elérhető — 2 hét helyett csak 12 nap, „villámgyors" szlogen'},
+    {e:'🎪',t:'Bűvész webshop: a csomag tartalmát kitalálod MIELŐTT kinyitod — ha eltalálod, ingyen van, eddig senki'},
+    {e:'🧑‍🍳',t:'Webshop bevezette a „séf ajánlatát" — mindig más terméket küld, mint amit rendeltél, de „jobb"'},
+    {e:'🏰',t:'Középkori webshop: a rendelést pergamentekercsre írják, galambpostával küldik — szállítási idő: kiszámíthatatlan'},
+    {e:'🦡',t:'Borz webshop: éjszakai kézbesítés, a futár nem csönget, ássa be a csomagot a kertedbe'},
+    {e:'🎵',t:'Webshop ASMR-értékeléseket vezetett be — suttogva mondják el miért 5 csillag, 2 millió megtekintés'},
+    {e:'🧑‍⚕️',t:'Gyógyszertár webshop: a mellékhatások listája hosszabb mint a termékleírás — a vásárlók izgatottan olvassák'},
+    {e:'🦋',t:'Pillangó webshop: a termékek 2 hét alatt „átalakulnak" — eleinte csúnyák, aztán gyönyörűek, mint a hernyó'},
+    {e:'🎯',t:'Webshop személyre szabott 404-es oldalt csinált — a vásárló neve + „hová tűntél?" felirattal'},
+    {e:'🧊',t:'Jégvirágos ablak webshop: csak télen van készleten — nyáron „olvadó kedvezmény" (nem létezik a termék)'},
+    {e:'🐔',t:'Tyúk webshop AI-ja megjósolja hány tojást fogsz enni jövő héten — 78%-os pontossággal'},
+    {e:'🎡',t:'Webshop loyalty program: 10 rendelés után kapsz egy 11.-et amit nem kértél — „meglepetés hűség"'},
+    {e:'🧑‍🏭',t:'Gyári webshop: a futár is a gyárban készült — robot, de mosolyog, és mindig pontosan jön'},
+    {e:'🦩',t:'Flamingó asztali lámpa webshop a világ 3. legértékesebb márkája — a flamingók tárgyalnak a Nobel-díjról'},
+    {e:'🧳',t:'Utazási kellék webshop: a csomag 14 országon ment át mire megérkezett — többet utazott mint te'},
+    {e:'🐒',t:'Majom webshop: az ajánlórendszert egy csimpánz írta — jobb konverziós ráta mint az AI'},
+    {e:'🎤',t:'Webshop CEO motivációs beszéde: „Vásárolj vagy ne, de inkább vásárolj" — 3 millió megosztás'},
+    {e:'🧲',t:'Kvantum webshop: amíg nem nyitod ki a csomagot, a termék egyszerre jó és rossz — Schrödinger szállítás'},
+    {e:'🦦',t:'Vidra webshop: a csomagot vízben szállítják — a folyami futárok 2024 legjobb startup-ja'},
+    {e:'🎨',t:'Webshop engedélyezte hogy a vásárlók rajzolják meg a terméket amit akarnak — a leggyakoribb rajz: pénz'},
+    {e:'🧑‍🌾',t:'Farm webshop: a zöldséget a megrendelés UTÁN ültetik el — szállítási idő: 3-4 hónap, frissesség: garantált'},
+    {e:'🏺',t:'Ókori görög webshop: minden terméknél filozófiai idézet — „Vásárolni emberi dolog" — Szókratész (nem mondta)'},
+    {e:'🦛',t:'Víziló webshop: a termékek nehezek és veszélyesek — a futárok életbiztosítással dolgoznak'},
+    {e:'🎹',t:'Zongora webshop: az unboxing videók 45 percesek — a zongora nem fér ki a dobozból, a vásárló mindig sír'},
+    {e:'🧊',t:'Fagyasztó webshop: a raktár -30°C — az alkalmazottak jégkorszaki jelmezben dolgoznak, „csapatépítés"'},
+    {e:'🐞',t:'Katicabogár webshop: 7 pöttyös termékekre 7% kedvezmény — a matekosok imádják, a többiek nem értik'},
+    {e:'🎯',t:'Webshop prediktív rendelés: MIELŐTT rákattintanál, a termék már úton van — 12% pontos, 88% meglepetés'},
+    {e:'🧑‍🎤',t:'Rapper webshop: a szállítási feltételek rímelnek — „ha fizetsz kedden, jön a csomag szerdán, nem lesz baj, ígérem"'},
+    {e:'🦚',t:'Páva webshop: a csomag szebb mint a termék — a vásárlók 60%-a a dobozt tartja meg, a terméket visszaküldi'},
+    {e:'🎮',t:'Gamer webshop: a checkout egy boss fight — ha legyőzöd, 5% kedvezmény, ha nem, dupla árat fizetsz'},
+    {e:'🧊',t:'Eszkimó webshop: a vásárlók 90%-a nem eszkimó — de az iglut mindenki akarja, mert „menő"'},
+    {e:'🐘',t:'Elefánt webshop: sosem felejti el a rendelésedet — 2007-es kosarat is megőrizte, emailt küld róla hetente'},
+    {e:'🎪',t:'Webshop éves gála: a legjobb vásárló díjat kap — az idei nyertes 847 rendelésből 2-t tartott meg'},
+    {e:'🧲',t:'Mesterséges gravitáció webshop: a termékek felfelé esnek kézbesítéskor — a fizikusok zavarban, a vásárlók is'},
+    {e:'🦥',t:'Webshop „lassan de biztosan" módot indított — a rendelés 2 hónapig tart, de közben meditatív zenét kapsz'},
+    {e:'🎨',t:'Webshop dizájnt cserélt: a régi design visszajött 3 perc múlva — „a vásárlók szavaztak a lábukkal (a kosár felé)"'},
+  ];
+  // Duplicate for seamless loop
+  const container=document.getElementById('tickerContent');
+  for(let i=news.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[news[i],news[j]]=[news[j],news[i]]}
+  const items=[...news,...news];
+  container.innerHTML=items.map(n=>`<span class="news-item"><span class="news-emoji">${n.e}</span>${n.t}<span class="news-dot">●</span></span>`).join('');
+  container.style.setProperty('--ticker-duration','2340s');
+})();
+const AudioCtx=window.AudioContext||window.webkitAudioContext;
+let audioCtx=null,soundOn=true;
+function ensureAudio(){if(!audioCtx)audioCtx=new AudioCtx();if(audioCtx.state==='suspended')audioCtx.resume()}
+function playClick(){
+  if(!soundOn)return;ensureAudio();const now=audioCtx.currentTime;
+  const g=audioCtx.createGain();g.connect(audioCtx.destination);g.gain.setValueAtTime(.12,now);g.gain.linearRampToValueAtTime(.001,now+.12);
+  const o1=audioCtx.createOscillator();o1.type='sine';o1.frequency.setValueAtTime(1200,now);o1.frequency.linearRampToValueAtTime(1800,now+.04);o1.connect(g);o1.start(now);o1.stop(now+.06);
+  const g2=audioCtx.createGain();g2.connect(audioCtx.destination);g2.gain.setValueAtTime(.1,now+.05);g2.gain.linearRampToValueAtTime(.001,now+.15);
+  const o2=audioCtx.createOscillator();o2.type='sine';o2.frequency.setValueAtTime(1800,now+.05);o2.frequency.linearRampToValueAtTime(2400,now+.1);o2.connect(g2);o2.start(now+.05);o2.stop(now+.15);
+}
+function playBuy(){
+  if(!soundOn)return;ensureAudio();const now=audioCtx.currentTime;
+  const g=audioCtx.createGain();g.connect(audioCtx.destination);g.gain.setValueAtTime(.1,now);g.gain.linearRampToValueAtTime(.001,now+.2);
+  const o=audioCtx.createOscillator();o.type='triangle';o.frequency.setValueAtTime(600,now);o.frequency.linearRampToValueAtTime(900,now+.1);o.frequency.linearRampToValueAtTime(1200,now+.18);o.connect(g);o.start(now);o.stop(now+.2);
+}
+function playAchievement(){
+  if(!soundOn)return;ensureAudio();const now=audioCtx.currentTime;
+  [800,1000,1200,1600].forEach((f,i)=>{const t=now+i*.08,g=audioCtx.createGain();g.connect(audioCtx.destination);g.gain.setValueAtTime(.08,t);g.gain.linearRampToValueAtTime(.001,t+.2);const o=audioCtx.createOscillator();o.type='sine';o.frequency.setValueAtTime(f,t);o.connect(g);o.start(t);o.stop(t+.2)});
+}
+function playPrestige(){
+  if(!soundOn)return;ensureAudio();const now=audioCtx.currentTime;
+  [400,600,800,1000,1200,1600].forEach((f,i)=>{const t=now+i*.1,g=audioCtx.createGain();g.connect(audioCtx.destination);g.gain.setValueAtTime(.1,t);g.gain.linearRampToValueAtTime(.001,t+.35);const o=audioCtx.createOscillator();o.type='sine';o.frequency.setValueAtTime(f,t);o.connect(g);o.start(t);o.stop(t+.35)});
+}
+document.getElementById('soundBtn').addEventListener('click',()=>{soundOn=!soundOn;const b=document.getElementById('soundBtn');b.textContent=soundOn?'🔊':'🔇';b.classList.toggle('on',soundOn)});
+
+// === Menu ===
+let menuOpen=false,logUnread=0;
+function toggleMenu(){
+  menuOpen=!menuOpen;
+  document.getElementById('menuPanel').classList.toggle('open',menuOpen);
+  if(menuOpen){logUnread=0;updateLogBadge()}
+}
+function switchMenuTab(tab){
+  document.querySelectorAll('.menu-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.menu-page').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`.menu-page[data-menu="${tab}"]`).classList.add('active');
+  document.querySelectorAll('.menu-tab').forEach(b=>{
+    if(b.textContent.toLowerCase().includes(tab==='info'?'leírás':tab==='log'?'napló':'beállítás')) b.classList.add('active');
+  });
+  if(tab==='log'){logUnread=0;updateLogBadge()}
+}
+function updateLogBadge(){
+  const b=document.getElementById('logBadge');
+  b.textContent=logUnread;b.classList.toggle('visible',logUnread>0);
+}
+let resetPending=false;
+function confirmReset(){
+  if(!resetPending){
+    resetPending=true;
+    document.querySelector('.menu-action-btn.reset').textContent='⚠️ Biztos? Kattints újra!';
+    document.querySelector('.menu-action-btn.reset').style.background='#dc2626';
+    document.querySelector('.menu-action-btn.reset').style.color='#fff';
+    setTimeout(()=>{
+      resetPending=false;
+      document.querySelector('.menu-action-btn.reset').textContent='🗑️ Új játék indítása';
+      document.querySelector('.menu-action-btn.reset').style.background='#fee2e2';
+      document.querySelector('.menu-action-btn.reset').style.color='#dc2626';
+    },3000);
+    return;
+  }
+  resetPending=false;
+  localStorage.removeItem('webshopClickerSave');
+  money=0;totalEarned=0;totalClicks=0;clickValue=10;perSecond=0;
+  prestigeLevel=0;prestigeMultiplier=1;prestizs=0;custTotal=0;
+  seasonMultiplier=1;currentSeason=null;
+  seasonBox.classList.remove('visible');
+  workers.forEach(w=>w.count=0);
+  upgrades.forEach(u=>u.bought=false);
+  luxuryItems.forEach(l=>l.bought=false);
+  achievements.forEach(a=>a.done=false);
+  rivals.forEach(r=>r.defeated=false);rivalsDefeated=0;
+  reviewList=[];reviewUnread=0;updateReviewBadge();
+  recalcPerSecond();
+  document.getElementById('customerCounter').textContent='👥 Vásárlók: 0';
+  document.getElementById('log').innerHTML='';
+  document.querySelector('.menu-action-btn.reset').textContent='🗑️ Új játék indítása';
+  document.querySelector('.menu-action-btn.reset').style.background='#fee2e2';
+  document.querySelector('.menu-action-btn.reset').style.color='#dc2626';
+  renderAll();renderAchievements();renderReviews();
+  addLog('🗑️ Játék <span>törölve</span> — újrakezdés!');
+  addLog('🛒 Kattints a kosárra a bevétel szerzéséhez!');
+  showPopup('🗑️','Új játék','Minden törölve — sok sikert!','🔄 Reset');
+  toggleMenu();
+}
+
+// === Tabs ===
+function switchTab(tab){
+  document.querySelectorAll('.panel-left .tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel-left .tab-content').forEach(c=>c.classList.remove('active'));
+  document.querySelector(`.tab-content[data-tab="${tab}"]`).classList.add('active');
+  document.querySelector(`.panel-left .tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
+}
+function switchRightTab(tab){
+  currentRightTab=tab;
+  document.querySelectorAll('.panel-right .tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel-right .tab-content').forEach(c=>c.classList.remove('active'));
+  document.querySelector(`.tab-content[data-rtab="${tab}"]`).classList.add('active');
+  document.querySelector(`.panel-right .tab-btn[onclick="switchRightTab('${tab}')"]`).classList.add('active');
+  if(tab==='reviews'){reviewUnread=0;updateReviewBadge()}
+}
+
+// === State ===
+let money=0,totalEarned=0,totalClicks=0,clickValue=10,perSecond=0;
+let prestigeLevel=0,prestigeMultiplier=1;
+const PRESTIGE_THRESHOLD=10000000;
+
+const workers=[
+  {id:'intern',icon:'🧑‍💻',name:'Gyakornok',desc:'Csomagolja a rendeléseket.',baseCost:50,baseIncome:1,count:0,costMult:1.15},
+  {id:'support',icon:'🎧',name:'Ügyfélszolgálatos',desc:'Válaszol a vásárlók kérdéseire.',baseCost:300,baseIncome:4,count:0,costMult:1.15},
+  {id:'influencer',icon:'📸',name:'Influencer',desc:'TikTokon népszerűsíti a boltot.',baseCost:800,baseIncome:10,count:0,costMult:1.15},
+  {id:'marketer',icon:'📢',name:'Marketinges',desc:'Facebook hirdetéseket kezel.',baseCost:2000,baseIncome:22,count:0,costMult:1.15},
+  {id:'developer',icon:'💻',name:'Fejlesztő',desc:'Gyorsabbá teszi a webshopot.',baseCost:8000,baseIncome:80,count:0,costMult:1.15},
+  {id:'teambuilding',icon:'🏕️',name:'Csapatépítő tréning',desc:'Paintball, sör, motiváció. Ebben a sorrendben.',baseCost:25000,baseIncome:220,count:0,costMult:1.15},
+  {id:'rovo',icon:'🧠',name:'1 óra Konzultáció<br>Rovó Viktorral',desc:'Rendbeteszi a fejedet.',baseCost:40000,baseIncome:900,count:0,costMult:1.15},
+  {id:'warehouse',icon:'🏭',name:'Raktárvezető',desc:'Automatizálja a logisztikát.',baseCost:200000,baseIncome:1800,count:0,costMult:1.14},
+  {id:'cfo',icon:'🧑‍💼',name:'Pénzügyi igazgató',desc:'Optimalizálja a nyereséget.',baseCost:1000000,baseIncome:8000,count:0,costMult:1.14},
+  {id:'ai',icon:'🤖',name:'AI asszisztens',desc:'Mesterséges intelligenciával kezel mindent.',baseCost:5000000,baseIncome:35000,count:0,costMult:1.13},
+  {id:'datacenter',icon:'🖥️',name:'Adatközpont',desc:'Saját szerverpark, nonstop üzemel.',baseCost:25000000,baseIncome:150000,count:0,costMult:1.12},
+  {id:'quantum',icon:'⚛️',name:'Kvantumszámítógép',desc:'Egyszerre minden rendelést feldolgoz.',baseCost:150000000,baseIncome:750000,count:0,costMult:1.11},
+  {id:'skynet',icon:'🛰️',name:'Műholdas hálózat',desc:'Az egész Földet lefedi a webshopod.',baseCost:1000000000,baseIncome:4000000,count:0,costMult:1.10},
+];
+const upgrades=[
+  {id:'kiszervezzuk',icon:'🌐',name:'Kiszervezzük.hu használata',desc:'A legjobb döntés. Kattintás 2x.',cost:0,mult:2,bought:false},
+  {id:'better_site',icon:'🎨',name:'Szebb weboldal',desc:'Kattintásonként 2x bevétel.',cost:1000,mult:2,bought:false},
+  {id:'seo',icon:'🔍',name:'SEO optimalizálás',desc:'Kattintásonként 3x bevétel.',cost:8000,mult:3,bought:false},
+  {id:'cookie',icon:'🍪',name:'Cookie popup terrorista',desc:'Addig nem enged el, amíg nem vesz. 5x.',cost:40000,mult:5,bought:false},
+  {id:'mobile_app',icon:'📱',name:'Mobil alkalmazás',desc:'Kattintásonként 8x bevétel.',cost:200000,mult:8,bought:false},
+  {id:'premium',icon:'💎',name:'Prémium tagság',desc:'Kattintásonként 15x bevétel.',cost:1000000,mult:15,bought:false},
+  {id:'rovo_web',icon:'🧠',name:'Új webshop Rovó Viktortól',desc:'Viktor személyesen építi az új shopot. 40x.',cost:2000000,mult:40,bought:false},
+  {id:'fake_discount',icon:'🏷️',name:'„-90%" ami sosem volt olcsóbb',desc:'Klasszikus. Mindenki bedől. 25x.',cost:5000000,mult:25,bought:false},
+  {id:'ai_reco',icon:'🧠',name:'AI ajánlórendszer',desc:'Kattintásonként 50x bevétel.',cost:25000000,mult:50,bought:false},
+  {id:'newsletter',icon:'📧',name:'Napi 17 hírlevél',desc:'Leiratkozni? Sok sikert! 100x.',cost:100000000,mult:100,bought:false},
+  {id:'dark_pattern',icon:'🕳️',name:'Dark pattern mester',desc:'A „Nem" gomb elszalad az egér elől. 250x.',cost:500000000,mult:250,bought:false},
+  {id:'global',icon:'🌍',name:'Globális terjeszkedés',desc:'Kattintásonként 500x bevétel.',cost:2000000000,mult:500,bought:false},
+  {id:'black_hole',icon:'🕳️',name:'Pénznyelő fekete lyuk',desc:'Beszippantja az egész GDP-t. 1000x.',cost:10000000000,mult:1000,bought:false},
+];
+let prestizs=0;
+const luxuryItems=[
+  {id:'lux_shades',icon:'🕶️',name:'Gucci napszemüveg',desc:'Hogy ne lásd mennyi pénzt költöttél.',cost:5000,prestige:1,bought:false},
+  {id:'lux_sneaker',icon:'👟',name:'Limitált Nike Air',desc:'Sosem hordod, de a polcon jól mutat.',cost:25000,prestige:3,bought:false},
+  {id:'lux_watch',icon:'⌚',name:'Rolex Submariner',desc:'Mindig tudod hány óra — stílusosan.',cost:100000,prestige:5,bought:false},
+  {id:'lux_bag',icon:'👜',name:'Louis Vuitton táska',desc:'A laptopodnak is jár a luxus.',cost:300000,prestige:8,bought:false},
+  {id:'lux_iphone',icon:'📱',name:'iPhone 47 Pro Max Ultra',desc:'Még ki sem jött, de neked már megvan.',cost:800000,prestige:10,bought:false},
+  {id:'lux_suit',icon:'🤵',name:'Armani öltöny',desc:'Otthon is ebben ülsz a gép előtt.',cost:1500000,prestige:12,bought:false},
+  {id:'lux_dog',icon:'🐩',name:'Díjnyertes uszkár',desc:'Saját Instagram oldala van.',cost:3000000,prestige:15,bought:false},
+  {id:'lux_boat',icon:'🚤',name:'Motorcsónak',desc:'A Balatonon te vagy a király.',cost:8000000,prestige:20,bought:false},
+  {id:'lux_tesla',icon:'🚗',name:'Tesla Model S',desc:'Magától vezet — te csak pózolsz.',cost:20000000,prestige:30,bought:false},
+  {id:'lux_lambo',icon:'🏎️',name:'Lamborghini Huracán',desc:'A szomszéd irigységből eladta a házát.',cost:50000000,prestige:50,bought:false},
+  {id:'lux_penth',icon:'🏙️',name:'Penthouse Budapest belváros',desc:'Kilátás a Dunára, jacuzzi a tetőn.',cost:120000000,prestige:70,bought:false},
+  {id:'lux_villa_balaton',icon:'🏡',name:'Villa a Balatonnál',desc:'Saját stéggel és borbárral.',cost:250000000,prestige:90,bought:false},
+  {id:'lux_heli',icon:'🚁',name:'Privát helikopter',desc:'Mert a dugóban állás parasztoknak való.',cost:500000000,prestige:120,bought:false},
+  {id:'lux_gf1',icon:'💃',name:'Modell barátnő #1',desc:'Instán ismerkedtetek. Romantikus.',cost:100000000,prestige:60,bought:false},
+  {id:'lux_gf2',icon:'💃',name:'Modell barátnő #2',desc:'Az elsőnek ne szólj.',cost:200000000,prestige:80,bought:false},
+  {id:'lux_gf3',icon:'💃',name:'Modell barátnő #3',desc:'Ezen a ponton már menedzser kell hozzá.',cost:400000000,prestige:100,bought:false},
+  {id:'lux_castle',icon:'🏰',name:'Kastély Skóciában',desc:'Kísértettel együtt. Feature, nem bug.',cost:800000000,prestige:150,bought:false},
+  {id:'lux_island',icon:'🏝️',name:'Privát sziget',desc:'Google Maps-en a te neved van rajta.',cost:2000000000,prestige:200,bought:false},
+  {id:'lux_jet',icon:'✈️',name:'Magánrepülő',desc:'A pilóta is webshopról álmodik.',cost:5000000000,prestige:300,bought:false},
+  {id:'lux_rocket',icon:'🚀',name:'Űrjárat a Holdra',desc:'Bezos még csak a stratoszféráig jutott.',cost:10000000000,prestige:400,bought:false},
+  {id:'lux_dinosaur',icon:'🦕',name:'Klónozott dinoszaurusz',desc:'A kertben él. A postás azóta nem jön.',cost:25000000000,prestige:500,bought:false},
+  {id:'lux_country',icon:'🌍',name:'Saját ország',desc:'Te vagy a király, a miniszterelnök és a postás is.',cost:100000000000,prestige:1000,bought:false},
+  {id:'lux_moon',icon:'🌙',name:'A Hold megvásárlása',desc:'Most már tényleg tied a világ.',cost:500000000000,prestige:2500,bought:false},
+  {id:'lux_time',icon:'⏳',name:'Időgép',desc:'Visszamész és hamarabb indítod a webshopot.',cost:1000000000000,prestige:5000,bought:false},
+];
+const achievements=[
+  {id:'first_click',icon:'👆',name:'Első kattintás',desc:'Kattints a kosárra!',check:()=>totalClicks>=1,done:false,target:1,metric:'clicks'},
+  {id:'click100',icon:'🖱️',name:'Kattintógép',desc:'100 kattintás',check:()=>totalClicks>=100,done:false,target:100,metric:'clicks'},
+  {id:'click1000',icon:'⚡',name:'Villámkezű',desc:'1 000 kattintás',check:()=>totalClicks>=1000,done:false,target:1000,metric:'clicks'},
+  {id:'earn1k',icon:'💰',name:'Első ezer',desc:'Keress 1 000 Ft-ot',check:()=>totalEarned>=1000,done:false,target:1000,metric:'earned'},
+  {id:'earn100k',icon:'💵',name:'Százezres klub',desc:'Keress 100 000 Ft-ot',check:()=>totalEarned>=100000,done:false,target:100000,metric:'earned'},
+  {id:'earn1m',icon:'🏦',name:'Milliomos',desc:'Keress 1 000 000 Ft-ot',check:()=>totalEarned>=1000000,done:false,target:1000000,metric:'earned'},
+  {id:'earn100m',icon:'👑',name:'E-kereskedelmi mogul',desc:'Keress 100 000 000 Ft-ot',check:()=>totalEarned>=100000000,done:false,target:100000000,metric:'earned'},
+  {id:'earn1b',icon:'🚀',name:'Milliárdos',desc:'Keress 1 000 000 000 Ft-ot',check:()=>totalEarned>=1000000000,done:false,target:1000000000,metric:'earned'},
+  {id:'worker5',icon:'👥',name:'Kis csapat',desc:'Alkalmazz 5 embert',check:()=>workers.reduce((s,w)=>s+w.count,0)>=5,done:false,target:5,metric:'workers'},
+  {id:'worker50',icon:'🏢',name:'Nagyvállalat',desc:'Alkalmazz 50 embert',check:()=>workers.reduce((s,w)=>s+w.count,0)>=50,done:false,target:50,metric:'workers'},
+  {id:'rovo1',icon:'🧠',name:'Első konzultáció',desc:'Konzultálj Rovó Viktorral!',check:()=>workers.find(w=>w.id==='rovo').count>=1,done:false,target:1,metric:'rovo'},
+  {id:'rovo25',icon:'👑',name:'Viktor törzsvendége',desc:'25 konzultáció — Viktor már a nevedről szólít',check:()=>workers.find(w=>w.id==='rovo').count>=25,done:false,target:25,metric:'rovo'},
+  {id:'prestige1',icon:'⭐',name:'Franchise tulajdonos',desc:'Indíts Franchise-t!',check:()=>prestigeLevel>=1,done:false,target:1,metric:'prestige'},
+  {id:'prestige5',icon:'🌟',name:'Lánc mogul',desc:'5 Franchise',check:()=>prestigeLevel>=5,done:false,target:5,metric:'prestige'},
+];
+
+// === Helpers ===
+function fmt(n){
+  if(n>=1e12)return(n/1e12).toFixed(1)+' B';if(n>=1e9)return(n/1e9).toFixed(1)+' Mrd';
+  if(n>=1e6)return(n/1e6).toFixed(1)+' M';if(n>=1e3)return Math.floor(n).toLocaleString('hu-HU');
+  return Math.floor(n).toString();
+}
+function workerCost(w){return Math.floor(w.baseCost*Math.pow(w.costMult,w.count))}
+function workerIncome(w){return Math.floor(w.baseIncome*prestigeMultiplier)}
+function recalcPerSecond(){perSecond=workers.reduce((s,w)=>s+w.count*workerIncome(w),0);const display=seasonMultiplier>1?fmt(Math.floor(perSecond*seasonMultiplier))+' Ft/mp (×'+seasonMultiplier+')':fmt(perSecond)+' Ft/mp';document.getElementById('perSec').textContent='+'+display;updateCustomerRate()}
+
+function updateProgress(){
+  const next=achievements.find(a=>!a.done);
+  const label=document.getElementById('progressLabel'),fill=document.getElementById('progressFill');
+  if(!next){label.textContent='🎉 Minden mérföldkő elérve!';fill.style.width='100%';return}
+  label.textContent='Következő: '+next.name;let cur=0;
+  if(next.metric==='clicks')cur=totalClicks;else if(next.metric==='earned')cur=totalEarned;
+  else if(next.metric==='workers')cur=workers.reduce((s,w)=>s+w.count,0);else if(next.metric==='prestige')cur=prestigeLevel;
+  else if(next.metric==='rovo')cur=workers.find(w=>w.id==='rovo').count;
+  fill.style.width=Math.min(100,(cur/next.target)*100)+'%';
+}
+
+function getPrestigeMultiplier(l){return 1+l*.5}
+function updatePrestigeUI(){
+  document.getElementById('prestigeLvl').textContent=prestigeLevel+' ⭐';
+  document.getElementById('prestigeBonus').textContent='×'+prestigeMultiplier.toFixed(1);
+  const btn=document.getElementById('prestigeBtn'),info=document.getElementById('prestigeInfo');
+  if(totalEarned>=PRESTIGE_THRESHOLD){btn.classList.add('visible');info.classList.add('visible');info.textContent='Következő szorzó: ×'+getPrestigeMultiplier(prestigeLevel+1).toFixed(1)}
+  else{btn.classList.remove('visible');info.classList.remove('visible')}
+}
+function confirmPrestige(){
+  document.getElementById('ppBonus').textContent='×'+prestigeMultiplier.toFixed(1)+' → ×'+getPrestigeMultiplier(prestigeLevel+1).toFixed(1);
+  document.getElementById('prestigePopup').classList.add('show');document.getElementById('overlay').classList.add('show');
+}
+function closePrestige(){document.getElementById('prestigePopup').classList.remove('show');document.getElementById('overlay').classList.remove('show')}
+function doPrestige(){
+  closePrestige();playPrestige();spawnConfettiBurst();spawnConfettiBurst();spawnMegaSpin();
+  prestigeLevel++;prestigeMultiplier=getPrestigeMultiplier(prestigeLevel);
+  money=0;totalEarned=0;totalClicks=0;clickValue=Math.floor(10*prestigeMultiplier);
+  workers.forEach(w=>w.count=0);upgrades.forEach(u=>u.bought=false);recalcPerSecond();updatePrestigeUI();
+  addLog(`⭐ <span>Franchise #${prestigeLevel}</span> elindítva! Szorzó: ×${prestigeMultiplier.toFixed(1)}`);
+  showPopup('⭐','Franchise #'+prestigeLevel,'Szorzó: ×'+prestigeMultiplier.toFixed(1),'🔄 Franchise');
+  renderAll();renderAchievements();checkAchievements();
+}
+
+// === Render ===
+function renderWorkers(){
+  document.getElementById('workers').innerHTML=workers.map(w=>{
+    const cost=workerCost(w),locked=money<cost,isRovo=w.id==="rovo";
+    const eff=(w.baseIncome/w.baseCost*1000).toFixed(1);
+    const ttTitle=`${w.icon} ${w.name.replace('<br>',' ')}`;
+    const ttDesc=`${w.desc} Alap hozam: ${fmt(w.baseIncome)} Ft/mp. Jelenlegi: ${fmt(workerIncome(w))} Ft/mp.`;
+    const ttRule=`Ár növekedés: ×${w.costMult}/db. Összesen: ${w.count} db → ${fmt(w.count*workerIncome(w))} Ft/mp. Hatékonyság: ${eff} Ft/mp per 1000 Ft.`;
+    return `<div class="upgrade ${locked?'locked':''}${isRovo?' rovo-gold':''}" onclick="buyWorker('${w.id}')"
+      data-tt-title="${ttTitle}" data-tt-desc="${ttDesc}" data-tt-rule="${ttRule}">
+      <div class="upgrade-icon">${w.icon}</div>
+      <div class="upgrade-mid">
+        <div class="upgrade-name">${w.name}</div>
+        <div class="upgrade-desc">${w.desc}</div>
+        <div class="upgrade-desc" style="color:var(--green);font-weight:700">+${fmt(workerIncome(w))} Ft/mp</div>
+      </div>
+      <div class="upgrade-right">
+        <div class="upgrade-cost">${fmt(cost)} Ft</div>
+        <div class="upgrade-count ${w.count>0?'visible':''}">${w.count}×</div>
+      </div>
+    </div>`;
+  }).join('');
+  initTooltips();
+}
+function renderUpgrades(){
+  document.getElementById('upgrades').innerHTML=upgrades.map(u=>{
+    const locked=!u.bought&&money<u.cost,cls=u.bought?'bought':(locked?'locked':'');
+    const ttTitle=`${u.icon} ${u.name}`;
+    const ttDesc=u.bought?'Már megvásárolva! Aktív szorzó: ×'+u.mult+'.':`${u.desc} A kattintásod értékét szorozza ×${u.mult}-tel.`;
+    const allMults=upgrades.filter(x=>x.bought).reduce((s,x)=>s+x.mult,0);
+    const ttRule=u.bought?'A fejlesztések szorzói összeadódnak! Jelenlegi össz: ×'+allMults+'. Franchise-kor elvesznek.':(u.cost===0?'Ingyenes! A szorzók összeadódnak a többi fejlesztéssel.':'Ár: '+fmt(u.cost)+' Ft. A szorzók összeadódnak! Franchise-kor elvesznek.');
+    return `<div class="upgrade ${cls}" onclick="${u.bought?'':'buyUpgrade(\''+u.id+'\')'}"
+      data-tt-title="${ttTitle}" data-tt-desc="${ttDesc}" data-tt-rule="${ttRule}">
+      <div class="upgrade-icon">${u.icon}</div>
+      <div class="upgrade-mid">
+        <div class="upgrade-name">${u.name}</div>
+        <div class="upgrade-desc">${u.bought?'✓ Megvásárolva':u.desc}</div>
+      </div>
+      <div class="upgrade-right">
+        <div class="upgrade-cost">${u.bought?'—':fmt(u.cost)+' Ft'}</div>
+      </div>
+    </div>`;
+  }).join('');
+  initTooltips();
+}
+function renderAchievements(){
+  document.getElementById('achievements').innerHTML=achievements.map(a=>{
+    const ttTitle=`${a.done?a.icon:'🔒'} ${a.name}`;
+    const ttDesc=a.desc;
+    const ttRule=a.done?'✅ Teljesítve!':'Cél: '+fmt(a.target)+' '+(a.metric==='clicks'?'kattintás':a.metric==='earned'?'Ft összkereseted':a.metric==='workers'?'alkalmazott':a.metric==='prestige'?'franchise szint':a.metric==='rovo'?'Rovó konzultáció':a.metric);
+    return `<div class="achievement ${a.done?'unlocked':''}"
+      data-tt-title="${ttTitle}" data-tt-desc="${ttDesc}" data-tt-rule="${ttRule}">
+      <div class="achievement-icon">${a.done?a.icon:'🔒'}</div>
+      <div class="achievement-info"><div class="achievement-name">${a.name}</div><div class="achievement-desc">${a.desc}</div></div>
+    </div>`;
+  }).join('');
+  initTooltips();
+}
+function renderLuxury(){
+  document.getElementById('luxury').innerHTML=luxuryItems.map(l=>{
+    const locked=!l.bought&&money<l.cost;
+    const cls=l.bought?'bought luxury-item':(locked?'locked luxury-item':'luxury-item');
+    const ttTitle=`${l.icon} ${l.name}`;
+    const ttDesc=`${l.desc} Presztízs: +${l.prestige} pont.`;
+    const ttRule=l.bought?'✅ Megvásárolva! Franchise-kor megmarad.':'Ár: '+fmt(l.cost)+' Ft. Permanens — franchise-kor NEM veszik el!';
+    return `<div class="upgrade ${cls}" onclick="${l.bought?'':'buyLuxury(\''+l.id+'\')'}"
+      data-tt-title="${ttTitle}" data-tt-desc="${ttDesc}" data-tt-rule="${ttRule}">
+      <div class="upgrade-icon">${l.icon}</div>
+      <div class="upgrade-mid">
+        <div class="upgrade-name">${l.bought?'✓ ':''} ${l.name}</div>
+        <div class="upgrade-desc">${l.desc}</div>
+        <div class="prestige-badge">👑 +${l.prestige} presztízs</div>
+      </div>
+      <div class="upgrade-right">
+        <div class="upgrade-cost">${l.bought?'Tied!':fmt(l.cost)+' Ft'}</div>
+      </div>
+    </div>`;
+  }).join('');
+  initTooltips();
+}
+function buyLuxury(id){
+  const l=luxuryItems.find(x=>x.id===id);
+  if(money<l.cost||l.bought) return;
+  money-=l.cost;l.bought=true;prestizs+=l.prestige;
+  playBuy();spawnConfettiBurst();spawnConfettiBurst();
+  addLog(`${l.icon} Luxus: <span>${l.name}</span> — 👑 +${l.prestige} presztízs`);
+  showPopup(l.icon,l.name,'👑 +'+l.prestige+' presztízs','👑 Luxus');
+  renderAll();
+}
+function updatePrestizs(){
+  document.getElementById('prestizsValue').textContent=prestizs+' 👑';
+  const container=document.getElementById('luxuryIcons');
+  const bought=luxuryItems.filter(l=>l.bought);
+  container.innerHTML=bought.map(l=>`<span class="lux-icon" data-name="${l.name}" title="${l.name}">${l.icon}</span>`).join('');
+}
+function addLog(msg){
+  const el=document.getElementById('log'),d=document.createElement('div');
+  d.className='log-entry';d.innerHTML=msg;el.prepend(d);
+  if(el.children.length>40)el.removeChild(el.lastChild);
+  if(!menuOpen){logUnread++;updateLogBadge()}
+}
+
+function buyWorker(id){
+  const w=workers.find(x=>x.id===id),cost=workerCost(w);if(money<cost)return;
+  money-=cost;w.count++;playBuy();recalcPerSecond();
+  addLog(`${w.icon} Felvéve: <span>${w.name}</span> (${w.count}. db)`);renderAll();
+}
+function buyUpgrade(id){
+  const u=upgrades.find(x=>x.id===id);if(money<u.cost||u.bought)return;
+  money-=u.cost;u.bought=true;clickValue=Math.floor(clickValue*u.mult);playBuy();
+  addLog(`${u.icon} Fejlesztés: <span>${u.name}</span> — kattintás: ${fmt(clickValue)} Ft`);
+  spawnConfettiBurst();renderAll();
+}
+function checkAchievements(){
+  achievements.forEach(a=>{if(!a.done&&a.check()){
+    a.done=true;playAchievement();spawnConfettiBurst();
+    showPopup(a.icon,a.name,a.desc);addLog(`🏆 Mérföldkő: <span>${a.name}</span>`);renderAchievements();
+  }});updateProgress();updatePrestigeUI();
+}
+const congratsMessages=[
+  'Gratulálok!','Szép munka!','Fantasztikus!','Megérdemelted!','Így kell ezt!',
+  'Húúú, király!','Ügyes vagy!','Na EEEEZ az!','Brutális!','Respect!',
+  'Hatalmas!','Micsoda teljesítmény!','Bomba!','Zseniális!','Elképesztő!'
+];
+function showPopup(icon,title,desc,label){
+  const track=document.getElementById('bannerTrack');
+  const congrats=congratsMessages[Math.floor(Math.random()*congratsMessages.length)];
+  const tag=label||'🏆 Mérföldkő';
+  const b=document.createElement('div');
+  b.className='banner';
+  // Stack: count existing banners and offset
+  const existing=track.querySelectorAll('.banner');
+  const offset=6+existing.length*48;
+  b.style.top=offset+'px';
+  b.innerHTML=`<span class="b-icon">${icon}</span><span class="b-text"><span class="b-label">${tag}</span><span class="b-title">${congrats}</span><span class="b-sep">—</span><span class="b-desc">${title}: ${desc}</span></span>`;
+  track.appendChild(b);
+  setTimeout(()=>b.remove(),10500);
+}
+function updateDisplay(){
+  document.getElementById('money').textContent=fmt(money)+' Ft';
+  document.getElementById('totalClicks').textContent=fmt(totalClicks);
+  document.getElementById('totalEarned').textContent=fmt(totalEarned)+' Ft';
+}
+function renderAll(){updateDisplay();renderWorkers();renderUpgrades();renderLuxury();renderRivals();updateProgress();updatePrestigeUI();updatePrestizs()}
+
+// === Click ===
+const cartBtn=document.getElementById('cartBtn'),center=document.querySelector('.center');
+function spawnFloat(x,y,val){
+  const el=document.createElement('div');el.className='float-num';el.textContent='+'+fmt(val)+' Ft';
+  el.style.left=(x+(Math.random()-.5)*60)+'px';el.style.top=(y-30)+'px';
+  center.appendChild(el);setTimeout(()=>el.remove(),900);
+}
+function spawnParticles(x,y){
+  const colors=['#2563eb','#3b82f6','#60a5fa','#93c5fd','#10b981','#a855f7','#f59e0b'];
+  for(let i=0;i<12;i++){
+    const p=document.createElement('div');p.className='particle';
+    const angle=Math.random()*Math.PI*2,dist=40+Math.random()*80,size=4+Math.random()*7;
+    p.style.width=size+'px';p.style.height=size+'px';
+    p.style.setProperty('--dx',Math.cos(angle)*dist+'px');p.style.setProperty('--dy',Math.sin(angle)*dist+'px');
+    p.style.background=colors[Math.floor(Math.random()*colors.length)];
+    p.style.left=x+'px';p.style.top=y+'px';
+    center.appendChild(p);setTimeout(()=>p.remove(),800);
+  }
+}
+const cartWrap=document.getElementById('cartWrap');
+function spawnClickEffects(){
+  // Expanding ring
+  const ring=document.createElement('div');
+  ring.className='click-ring';
+  ring.style.left='50%';ring.style.top='50%';
+  cartWrap.appendChild(ring);
+  setTimeout(()=>ring.remove(),600);
+  // Sparkles
+  const sparkleColors=['#fbbf24','#60a5fa','#a78bfa','#34d399','#f472b6','#fb923c','#fff'];
+  for(let i=0;i<12;i++){
+    const s=document.createElement('div');
+    s.className='click-sparkle';
+    const angle=(i/12)*Math.PI*2;
+    const dist=50+Math.random()*40;
+    s.style.setProperty('--sx',Math.cos(angle)*dist+'px');
+    s.style.setProperty('--sy',Math.sin(angle)*dist+'px');
+    s.style.left='50%';s.style.top='50%';
+    s.style.background=sparkleColors[Math.floor(Math.random()*sparkleColors.length)];
+    s.style.boxShadow='0 0 6px '+sparkleColors[Math.floor(Math.random()*sparkleColors.length)];
+    cartWrap.appendChild(s);
+    setTimeout(()=>s.remove(),700);
+  }
+  // Stars
+  const starEmojis=['✨','💫','⚡','💰','🪙','✦'];
+  for(let i=0;i<4;i++){
+    const st=document.createElement('div');
+    st.className='click-star';
+    const angle=Math.random()*Math.PI*2;
+    const dist=30+Math.random()*30;
+    st.style.setProperty('--sx',Math.cos(angle)*dist+'px');
+    st.style.setProperty('--sy',Math.sin(angle)*dist-20+'px');
+    st.style.left='50%';st.style.top='50%';
+    st.textContent=starEmojis[Math.floor(Math.random()*starEmojis.length)];
+    cartWrap.appendChild(st);
+    setTimeout(()=>st.remove(),800);
+  }
+}
+
+cartBtn.addEventListener('click',(e)=>{
+  const cv=clickValue*seasonMultiplier;money+=cv;totalEarned+=cv;totalClicks++;playClick();
+  const rect=center.getBoundingClientRect();
+  spawnFloat(e.clientX-rect.left,e.clientY-rect.top,cv);
+  spawnParticles(e.clientX-rect.left,e.clientY-rect.top);
+  spawnClickEffects();
+  cartBtn.classList.add('clicked');setTimeout(()=>cartBtn.classList.remove('clicked'),100);
+  clickEventCounter++;
+  if(clickEventCounter%3===0) spawnCustomer();
+  if(clickEventCounter%5===0) spawnSurpriseEmoji();
+  if(clickEventCounter%20===0) spawnConfettiBurst();
+  if(clickEventCounter%50===0) spawnMegaSpin();
+  updateDisplay();checkAchievements();
+});
+
+// === Loop ===
+let lastTick=performance.now();
+function gameLoop(now){const dt=(now-lastTick)/1000;lastTick=now;if(perSecond>0){const e=perSecond*seasonMultiplier*dt;money+=e;totalEarned+=e}updateDisplay();requestAnimationFrame(gameLoop)}
+requestAnimationFrame(gameLoop);
+setInterval(()=>{renderWorkers();renderUpgrades();renderLuxury();renderRivals();checkAchievements()},500);
+
+// === Rivals ===
+const rivals=[
+  {name:'Béla bácsi Bazár Kft.',icon:'🧓',speed:5,defeated:false},
+  {name:'KisWebshop.hu',icon:'🏪',speed:20,defeated:false},
+  {name:'Fólia Feri Online',icon:'🧻',speed:60,defeated:false},
+  {name:'MegyeiPiactér Zrt.',icon:'🏬',speed:200,defeated:false},
+  {name:'Pesti Piac Kft.',icon:'🥨',speed:600,defeated:false},
+  {name:'TurboRendelés.hu',icon:'⚡',speed:2000,defeated:false},
+  {name:'CsomagBoom Kft.',icon:'💥',speed:6000,defeated:false},
+  {name:'MagyarShop Holding',icon:'🇭🇺',speed:18000,defeated:false},
+  {name:'Kelet-Közép Online Zrt.',icon:'🚂',speed:50000,defeated:false},
+  {name:'DunaPláza Digital',icon:'🌊',speed:150000,defeated:false},
+  {name:'EuroMegaStore AG',icon:'🇪🇺',speed:400000,defeated:false},
+  {name:'Balkán Express Ltd.',icon:'🏔️',speed:1000000,defeated:false},
+  {name:'NordShop Scandinavia',icon:'❄️',speed:3000000,defeated:false},
+  {name:'GlobalShop International',icon:'🌍',speed:8000000,defeated:false},
+  {name:'TechTitan E-Commerce Inc.',icon:'🤖',speed:25000000,defeated:false},
+  {name:'SilkRoad 2.0 Corp.',icon:'🐫',speed:80000000,defeated:false},
+  {name:'MegaMall Univerzum Kft.',icon:'🏗️',speed:250000000,defeated:false},
+  {name:'Óceánközi Rendelés Zrt.',icon:'🚢',speed:800000000,defeated:false},
+  {name:'Galaktikus Webáruház™',icon:'🛸',speed:3000000000,defeated:false},
+  {name:'Multiverzum Shopping ∞',icon:'🌌',speed:20000000000,defeated:false},
+];
+let rivalsDefeated=0;
+function renderRivals(){
+  const el=document.getElementById('rivals');
+  el.innerHTML=rivals.map(r=>{
+    const wasDefeated=r.defeated;
+    if(!r.defeated && perSecond>=r.speed){
+      r.defeated=true;rivalsDefeated++;
+      showPopup('⚔️','Legyőzted: '+r.name,'Most már te vagy a nagyobb!','⚔️ Rivális');
+      addLog(`⚔️ Legyőzted: <span>${r.name}</span>!`);
+      spawnConfettiBurst();
+    }
+    const isNext=!r.defeated && (rivals.indexOf(r)===0 || rivals[rivals.indexOf(r)-1].defeated);
+    let statusTxt='',statusCls='far';
+    if(r.defeated){statusTxt='✓ Legyőzve';statusCls='beaten'}
+    else if(isNext){
+      const pct=Math.min(99,Math.floor((perSecond/r.speed)*100));
+      statusTxt=pct+'%';statusCls='ahead';
+    } else{statusTxt=fmt(r.speed)+'/mp';statusCls='far'}
+    return `<div class="rival ${r.defeated?'defeated':''}${isNext?' current':''}">
+      <div class="rival-icon">${r.icon}</div>
+      <div class="rival-info"><div class="rival-name">${r.name}</div><div class="rival-speed">${r.defeated?'Volt: ':''} ${fmt(r.speed)} Ft/mp</div></div>
+      <div class="rival-status ${statusCls}">${statusTxt}</div>
+    </div>`;
+  }).join('');
+}
+
+// === Seasons ===
+const seasons=[
+  {name:'☀️ Nyári Leárazás',color:'linear-gradient(90deg,#f59e0b,#f97316)',textColor:'#fff',mult:1.5,dur:45},
+  {name:'🎄 Karácsonyi Láz',color:'linear-gradient(90deg,#dc2626,#16a34a)',textColor:'#fff',mult:2.0,dur:40},
+  {name:'📦 Black Friday',color:'linear-gradient(90deg,#111,#333)',textColor:'#fbbf24',mult:3.0,dur:25},
+  {name:'💐 Anyák Napja',color:'linear-gradient(90deg,#ec4899,#f472b6)',textColor:'#fff',mult:1.8,dur:35},
+  {name:'🐣 Húsvéti Akció',color:'linear-gradient(90deg,#a3e635,#4ade80)',textColor:'#166534',mult:1.6,dur:35},
+  {name:'💘 Valentin-nap',color:'linear-gradient(90deg,#e11d48,#fb7185)',textColor:'#fff',mult:1.7,dur:30},
+  {name:'🎒 Iskolakezdés',color:'linear-gradient(90deg,#2563eb,#7c3aed)',textColor:'#fff',mult:1.5,dur:35},
+  {name:'🌙 Éjszakai Vásár',color:'linear-gradient(90deg,#1e1b4b,#312e81)',textColor:'#a5b4fc',mult:2.5,dur:20},
+];
+let currentSeason=null,seasonMultiplier=1,seasonTimer=null,seasonCooldown=null,seasonStart=0,seasonDur=0;
+const seasonBox=document.getElementById('seasonBox');
+const seasonTitleEl=document.getElementById('seasonTitle');
+const seasonDescEl=document.getElementById('seasonDesc');
+const seasonMultEl=document.getElementById('seasonMult');
+const seasonFillEl=document.getElementById('seasonFill');
+const seasonTimerEl=document.getElementById('seasonTimer');
+
+function updateSeasonBar(){
+  if(!currentSeason) return;
+  const elapsed=(Date.now()-seasonStart)/1000;
+  const remaining=Math.max(0,seasonDur-elapsed);
+  const pct=Math.max(0,(remaining/seasonDur)*100);
+  seasonFillEl.style.width=pct+'%';
+  seasonTimerEl.textContent=Math.ceil(remaining)+' mp hátra';
+  if(remaining>0) requestAnimationFrame(updateSeasonBar);
+}
+
+function startSeason(){
+  const s=seasons[Math.floor(Math.random()*seasons.length)];
+  currentSeason=s;seasonMultiplier=s.mult;seasonStart=Date.now();seasonDur=s.dur;
+  seasonTitleEl.textContent=s.name;
+  seasonDescEl.textContent='Bevétel szorzó aktív!';
+  seasonMultEl.textContent='×'+s.mult;
+  seasonFillEl.style.width='100%';
+  seasonBox.classList.add('visible');
+  addLog(`${s.name} — bevétel <span>×${s.mult}</span>!`);
+  showPopup(s.name.split(' ')[0],s.name.replace(/^.\s/,''),'Bevétel ×'+s.mult+' '+s.dur+' mp-ig!','🗓️ Szezon');
+  recalcPerSecond();
+  requestAnimationFrame(updateSeasonBar);
+  if(seasonTimer) clearTimeout(seasonTimer);
+  seasonTimer=setTimeout(endSeason,s.dur*1000);
+}
+function endSeason(){
+  seasonMultiplier=1;currentSeason=null;
+  seasonBox.classList.remove('visible');
+  recalcPerSecond();
+  scheduleSeason();
+}
+function scheduleSeason(){
+  const wait=60000+Math.random()*60000; // 60-120s
+  if(seasonCooldown) clearTimeout(seasonCooldown);
+  seasonCooldown=setTimeout(startSeason,wait);
+}
+scheduleSeason();
+
+// === Customer Reviews ===
+const reviewNames=['Kovács Béla','Nagy Erzsébet','Tóth Gábor','Szabó Kinga','Kiss László','Horváth Anna','Molnár Péter','Varga Zsuzsa','Farkas Tamás','Papp Katalin','Balogh Imre','Takács Réka','Szűcs Dávid','Oláh Mária','Fekete János','Németh Lili','Simon Attila','Rácz Dóra','Lukács Zoltán','Orbán Nóra','Pintér Gergő','Mészáros Edit','Bodnár Ferenc','Jakab Boglárka','Szilágyi Márton'];
+const reviewAvatars=['👩','👨','👵','👴','🧑','👩‍💼','👨‍💼','👩‍🦰','👨‍🦱','🧔','👩‍🦳','👨‍🦳','🧒','💁','🙋'];
+
+const reviewsByTier=[
+  // Tier 0: 0-1000 Ft earned
+  {min:0,max:1000,reviews:[
+    {s:1,t:'Ez egy webshop? Azt hittem véletlenül egy üres mappát nyitottam meg.'},
+    {s:2,t:'A design olyan mintha egy 7 éves csinálta volna Paint-ben. Szombaton. Sírva.'},
+    {s:1,t:'Próbáltam rendelni, de a kosár gomb elbújt. Szó szerint.'},
+    {s:2,t:'A betöltési idő alatt megettem egy szendvicset, lezuhanyoztam, és még mindig töltött.'},
+    {s:1,t:'Kérem a pénzem vissza. Ja várj, nem is költöttem semmit. Mégis károsultnak érzem magam.'},
+  ]},
+  // Tier 1: 1K-50K
+  {min:1000,max:50000,reviews:[
+    {s:3,t:'Hát... létezik. Ez már valami.'},
+    {s:2,t:'Az ügyfélszolgálat azt válaszolta hogy „próbálja újra". 14-szer próbáltam.'},
+    {s:3,t:'A csomag megérkezett! Rossz címre, de megérkezett.'},
+    {s:2,t:'A „prémium csomagolás" egy újságpapír volt 2019-ből. Legalább elolvastam.'},
+    {s:3,t:'Már majdnem jó. Kb. mint egy kézzel rajzolt térkép — érteni vélem, de eltévedek.'},
+    {s:2,t:'A GYIK oldalon 3 kérdés van és mind ugyanaz a válasz: „Igen."'},
+  ]},
+  // Tier 2: 50K-500K
+  {min:50000,max:500000,reviews:[
+    {s:3,t:'Meglepően normális. A családom nem hiszi el, hogy itt rendeltem.'},
+    {s:4,t:'A szállítás gyorsabb volt mint a pizzafutár. Igaz, a pizza is innen jött.'},
+    {s:3,t:'Anyósom ajánlotta. Gyanús, de a termék jó.'},
+    {s:4,t:'A chatbot kedvesebb volt mint az exem. 5-ből 4 csillag, mert a chatbot sem hív vissza.'},
+    {s:3,t:'Rendben van, de a „szupergyors szállítás" 6 nap volt. Szuper.'},
+    {s:4,t:'A termékfotó és a valóság között csak 2-3 dimenzió különbség van.'},
+  ]},
+  // Tier 3: 500K-5M
+  {min:500000,max:5000000,reviews:[
+    {s:4,t:'Komolyan mondom, jobb mint a boltban. És nem kell nadrágot húzni.'},
+    {s:5,t:'3-szor rendeltem ezen a héten. A postás már tegez.'},
+    {s:4,t:'Az AI ajánló pontosan tudta mit akarok. Kicsit félelmetes, kicsit zseniális.'},
+    {s:5,t:'A szomszéd kérdezte honnan van a cuccom. Most ő is itt rendel. Sajnálom a postást.'},
+    {s:4,t:'A csomagolás szebb volt mint az esküvői meghívóm.'},
+    {s:5,t:'Édesanyám szerint ez a legjobb dolog ami történt a családdal a születésem óta.'},
+  ]},
+  // Tier 4: 5M-50M
+  {min:5000000,max:50000000,reviews:[
+    {s:5,t:'Bezárt miattatok a sarki bolt. A boltos most itt dolgozik. Mindenki nyer.'},
+    {s:5,t:'A feleségem elhagyott, de legalább a csomagjaim időben jönnek. Prioritások.'},
+    {s:4,t:'A VIP tagságom értékesebb mint a lakásom. Nem viccelek.'},
+    {s:5,t:'A futár már a nevemen szólít és hozza a kávémat is. Nem kértem. Mégis tökéletes.'},
+    {s:5,t:'A munkámat otthagytam, mert a napi rendeléseim menedzselése fulltime munka lett.'},
+    {s:4,t:'A bankszámlám sír, de a szívem énekel. Köszönöm ezt a webshopot.'},
+  ]},
+  // Tier 5: 50M-1B
+  {min:50000000,max:1000000000,reviews:[
+    {s:5,t:'A pszichológusom szerint „webshop-függő" vagyok. Ő is itt rendeli a papírzsebkendőt.'},
+    {s:5,t:'A gyerekem első szava „csomag" volt. Büszke apa vagyok.'},
+    {s:5,t:'Az adóbevallásomon a legnagyobb tétel ez a webshop. A könyvelőm sírt.'},
+    {s:4,t:'A házbizottság betiltotta a lépcsőházban a csomagolópapír-hegyet. Költöztünk.'},
+    {s:5,t:'A kutyám megtanulta kinyitni a csomagokat. Az evolúció a szemem előtt történik.'},
+    {s:5,t:'Havi 47 csomag. A postás PTSD-s lett. De a termékeik hibátlanok.'},
+  ]},
+  // Tier 6: 1B+
+  {min:1000000000,max:Infinity,reviews:[
+    {s:5,t:'A Forbes magazin a webshopot az év felfedezésének választotta. Egyetértek.'},
+    {s:5,t:'Anya mindent erre költ. Apának nincs vacsorája. De van 3 robotporszívója.'},
+    {s:5,t:'A lakásomat eladtam és egy raktárba költöztem a csomagjaim mellé. Boldog vagyok.'},
+    {s:5,t:'A temetésemen is innen rendelném a koszorút. Minőség mindhalálig.'},
+    {s:5,t:'A Rovó Viktor konzultáció TÉNYLEG megérte. Most 3 webshopom van. Na jó, 7.'},
+    {s:5,t:'Állampolgársági kérelmemet erre a webshopra hivatkozva fogadták el. Nem kérdezem hogyan.'},
+    {s:5,t:'Az ENSZ figyelmeztette az országot a webshoptól való gazdasági függőség miatt. Büszke vagyok.'},
+    {s:4,t:'Egyetlen kritikám: a galaktikus szállítás még nem elérhető. De bízom bennetek.'},
+  ]},
+];
+
+let reviewList=[];
+let reviewTimer=null;
+let reviewUnread=0;
+let currentRightTab='achievements';
+const reviewDates=['ma','tegnap','2 napja','3 napja','ezen a héten','múlt héten'];
+
+function playReviewSound(){
+  if(!soundOn) return;
+  try{
+    const ctx=new AudioCtx();
+    const o=ctx.createOscillator();const g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.frequency.setValueAtTime(880,ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(1320,ctx.currentTime+0.08);
+    o.frequency.exponentialRampToValueAtTime(1760,ctx.currentTime+0.15);
+    o.type='sine';g.gain.setValueAtTime(0.08,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+0.3);
+  }catch(e){}
+}
+
+function updateReviewBadge(){
+  const b=document.getElementById('reviewBadge');
+  b.textContent=reviewUnread;
+  b.classList.toggle('visible',reviewUnread>0);
+}
+
+function generateReview(){
+  const tier=reviewsByTier.find(t=>totalEarned>=t.min && totalEarned<t.max)||reviewsByTier[reviewsByTier.length-1];
+  const template=tier.reviews[Math.floor(Math.random()*tier.reviews.length)];
+  const name=reviewNames[Math.floor(Math.random()*reviewNames.length)];
+  const avatar=reviewAvatars[Math.floor(Math.random()*reviewAvatars.length)];
+  const date=reviewDates[Math.floor(Math.random()*reviewDates.length)];
+  const stars='⭐'.repeat(template.s)+'☆'.repeat(5-template.s);
+  return {name,avatar,stars,text:template.t,date,score:template.s};
+}
+
+function addReview(){
+  const r=generateReview();
+  reviewList.unshift(r);
+  if(reviewList.length>20) reviewList.pop();
+  renderReviews();
+  playReviewSound();
+  if(currentRightTab!=='reviews'){
+    reviewUnread++;
+    updateReviewBadge();
+    const btn=document.querySelector('.panel-right .tab-btn[onclick="switchRightTab(\'reviews\')"]');
+    btn.classList.remove('has-new');
+    void btn.offsetWidth;
+    btn.classList.add('has-new');
+  }
+}
+
+function renderReviews(){
+  const el=document.getElementById('reviews');
+  if(!reviewList.length){
+    el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:.72rem;font-weight:600">Még nincsenek vélemények...<br>Játssz egy kicsit és jönnek!</div>';
+    return;
+  }
+  el.innerHTML=reviewList.map(r=>`
+    <div class="review">
+      <div class="review-header">
+        <div class="review-name">${r.avatar} ${r.name}</div>
+        <div class="review-stars">${r.stars}</div>
+      </div>
+      <div class="review-text">„${r.text}"</div>
+      <div class="review-date">${r.date}</div>
+    </div>
+  `).join('');
+}
+
+// Generate reviews periodically - faster when more income
+function scheduleReview(){
+  const interval=Math.max(8000, 25000 - Math.min(15000, Math.log10(Math.max(1,totalEarned))*2000));
+  reviewTimer=setTimeout(()=>{
+    if(totalEarned>0) addReview();
+    scheduleReview();
+  },interval);
+}
+scheduleReview();
+renderReviews();
+
+// === Customer visualization ===
+const customerEmojis=['🧑','👩','👨','🧒','👵','👴','👩‍💼','👨‍💼','🧑‍💻','👩‍🎤','👨‍🍳','🧑‍🏫','👷','💁','🙋','🤷','👩‍🦰','👨‍🦱','👩‍🦳','🧔'];
+const customerItems=['🛍️','📦','🎁','👜','🛒','💳','📱','👟','👗','🧸','📚','🎮','💄','🧴','🍫'];
+const customerSayings=[
+  'Király!','Ezt vettem!','Jó bolt!','Ajánlom!','Wow!','Olcsó!','Szuper!','Kell!',
+  'Imádom!','Megéri!','Visszajövök!','5 csillag!','Top!','Brutál!','Na ez az!',
+  'Hú de jó!','Ezt kerestem!','Pakold be!','Viszem!','Leárazás?!','😍','🔥','💯'
+];
+const custLayer=document.getElementById('customerLayer');
+let custTotal=0;
+
+function spawnCustomer(){
+  const c=document.createElement('div');
+  const fromLeft=Math.random()>.5;
+  c.className='customer '+(fromLeft?'from-left':'from-right');
+  const emoji=customerEmojis[Math.floor(Math.random()*customerEmojis.length)];
+  const item=customerItems[Math.floor(Math.random()*customerItems.length)];
+  const say=customerSayings[Math.floor(Math.random()*customerSayings.length)];
+  const dur=6+Math.random()*6;
+  const bottom=5+Math.random()*25;
+  c.style.setProperty('--dur',dur+'s');
+  c.style.bottom=bottom+'%';
+  c.innerHTML=`<span class="c-bubble">${say}</span><span class="c-body">${emoji}${item}</span>`;
+  custLayer.appendChild(c);
+  custTotal++;
+  document.getElementById('customerCounter').textContent='👥 Vásárlók: '+custTotal;
+  setTimeout(()=>c.remove(),dur*1000+200);
+}
+
+// Spawn customers based on income rate
+let custTimer=null;
+function updateCustomerRate(){
+  if(custTimer) clearInterval(custTimer);
+  const totalWorkers=workers.reduce((s,w)=>s+w.count,0);
+  if(totalWorkers<=0 && perSecond<=0) return;
+  // More workers = more frequent customers, cap at ~every 400ms
+  const interval=Math.max(400, 3000 - totalWorkers*80);
+  custTimer=setInterval(spawnCustomer,interval);
+}
+// Also spawn on click
+let clickCustCounter=0;
+
+// === Save / Load ===
+function saveGame(){
+  const save={
+    money,totalEarned,totalClicks,clickValue,
+    prestigeLevel,prestigeMultiplier,prestizs,rivalsDefeated,
+    workers:workers.map(w=>w.count),
+    upgrades:upgrades.map(u=>u.bought),
+    luxury:luxuryItems.map(l=>l.bought),
+    rivals:rivals.map(r=>r.defeated),
+    achievements:achievements.map(a=>a.done),
+    ts:Date.now()
+  };
+  try{
+    localStorage.setItem('webshopClickerSave',JSON.stringify(save));
+    showPopup('💾','Játék mentve!','Állásod biztonságban van.','💾 Mentés');
+    addLog('💾 Játék <span>elmentve</span>!');
+  }catch(e){
+    addLog('❌ Mentés <span>sikertelen</span>!');
+  }
+}
+function loadGame(){
+  try{
+    const raw=localStorage.getItem('webshopClickerSave');
+    if(!raw) return false;
+    const s=JSON.parse(raw);
+    money=s.money||0;totalEarned=s.totalEarned||0;totalClicks=s.totalClicks||0;
+    clickValue=s.clickValue||10;prestigeLevel=s.prestigeLevel||0;
+    prestigeMultiplier=s.prestigeMultiplier||1;
+    if(s.workers) s.workers.forEach((c,i)=>{if(workers[i])workers[i].count=c});
+    if(s.upgrades) s.upgrades.forEach((b,i)=>{if(upgrades[i])upgrades[i].bought=b});
+    if(s.luxury) s.luxury.forEach((b,i)=>{if(luxuryItems[i])luxuryItems[i].bought=b});
+    if(s.rivals) s.rivals.forEach((d,i)=>{if(rivals[i])rivals[i].defeated=d});
+    rivalsDefeated=s.rivalsDefeated||0;
+    prestizs=s.prestizs||0;
+    if(s.achievements) s.achievements.forEach((d,i)=>{if(achievements[i])achievements[i].done=d});
+    recalcPerSecond();
+    return true;;
+  }catch(e){return false}
+}
+
+// Auto-save every 30 seconds
+setInterval(()=>{
+  try{
+    const save={money,totalEarned,totalClicks,clickValue,prestigeLevel,prestigeMultiplier,prestizs,rivalsDefeated,
+      workers:workers.map(w=>w.count),upgrades:upgrades.map(u=>u.bought),
+      luxury:luxuryItems.map(l=>l.bought),rivals:rivals.map(r=>r.defeated),
+      achievements:achievements.map(a=>a.done),ts:Date.now()};
+    localStorage.setItem('webshopClickerSave',JSON.stringify(save));
+  }catch(e){}
+},30000);
+
+// Try loading on start
+const loaded=loadGame();
+
+renderAll();renderAchievements();updateProgress();
+if(loaded){
+  addLog('💾 Korábbi <span>mentés betöltve</span>!');
+  addLog('🛒 Folytasd ahol abbahagytad!');
+}else{
+  addLog('🎉 Üdvözöllek a <span>Webshop Clicker Game</span>-ben!');
+  addLog('🛒 Kattints a kosárra a bevétel szerzéséhez!');
+}
+
+// === Tooltip system ===
+const tooltip=document.getElementById('gameTooltip');
+const ttTitle=document.getElementById('ttTitle');
+const ttDesc=document.getElementById('ttDesc');
+const ttRule=document.getElementById('ttRule');
+let ttVisible=false;
+
+function showTooltip(el,e){
+  const t=el.dataset.ttTitle||'';
+  const d=el.dataset.ttDesc||'';
+  const r=el.dataset.ttRule||'';
+  if(!t&&!d) return;
+  ttTitle.innerHTML=t;ttDesc.innerHTML=d;
+  ttRule.innerHTML=r;ttRule.style.display=r?'block':'none';
+  const center=document.querySelector('.center');
+  const cr=center.getBoundingClientRect();
+  tooltip.style.left=(cr.left+16)+'px';tooltip.style.top=(cr.top+16)+'px';
+  tooltip.classList.add('visible');ttVisible=true;
+}
+function positionTooltip(e){}
+function hideTooltip(){tooltip.classList.remove('visible');ttVisible=false}
+
+document.addEventListener('mousemove',(e)=>{
+  if(!ttVisible) return;
+  positionTooltip(e);
+});
+
+// Attach to all [data-tt-title] elements
+function initTooltips(){
+  document.querySelectorAll('[data-tt-title]').forEach(el=>{
+    el.addEventListener('mouseenter',(e)=>showTooltip(el,e));
+    el.addEventListener('mouseleave',hideTooltip);
+  });
+}
+
+// Add tooltip data to static elements
+document.querySelector('.revenue-card').setAttribute('data-tt-title','💰 Kassza');
+document.querySelector('.revenue-card').setAttribute('data-tt-desc','A jelenlegi egyenleged. Ebből vásárolhatsz alkalmazottakat, fejlesztéseket és luxuscikkeket.');
+document.querySelector('.revenue-card').setAttribute('data-tt-rule','Növelheted kattintással és alkalmazottakkal. Franchise-kor nullázódik.');
+
+document.querySelector('.cart-btn').setAttribute('data-tt-title','🛒 Kosár gomb');
+document.querySelector('.cart-btn').setAttribute('data-tt-desc','Kattints a bevétel szerzéséhez! Minden kattintás a jelenlegi kattintási értéket adja hozzá a kasszához.');
+document.querySelector('.cart-btn').setAttribute('data-tt-rule','Alap: 10 Ft/kattintás. Fejlesztésekkel sokszorozható. Szezon alatt bónuszt kap.');
+
+document.querySelector('.per-sec').setAttribute('data-tt-title','📊 Bevétel/másodperc');
+document.querySelector('.per-sec').setAttribute('data-tt-desc','Ennyi Ft-ot termelnek az alkalmazottaid automatikusan, másodpercenként.');
+document.querySelector('.per-sec').setAttribute('data-tt-rule','Több alkalmazott = több Ft/mp. Franchise szorzó és szezon bónusz is szorzza.');
+
+document.querySelector('.progress-wrap').setAttribute('data-tt-title','📈 Következő mérföldkő');
+document.querySelector('.progress-wrap').setAttribute('data-tt-desc','A progress bar mutatja mennyire vagy közel a következő mérföldkő eléréséhez.');
+document.querySelector('.progress-wrap').setAttribute('data-tt-rule','Mérföldkövek: kattintás, bevétel, alkalmazottak, franchise és konzultációk alapján.');
+
+document.getElementById('prestigeBtn').setAttribute('data-tt-title','🔄 Franchise');
+document.getElementById('prestigeBtn').setAttribute('data-tt-desc','Újrakezded a játékot permanens bevételi szorzóval. Alkalmazottak és fejlesztések elvesznek.');
+document.getElementById('prestigeBtn').setAttribute('data-tt-rule','Elérhető: 10M Ft összbevételnél. Szorzók: ×1.5 → ×2.0 → ×2.5... Luxus és mérföldkövek megmaradnak!');
+
+// Tooltip data for topbar stats
+document.querySelectorAll('.stat').forEach(s=>{
+  const label=s.querySelector('.stat-label');
+  if(!label) return;
+  const txt=label.textContent.trim();
+  if(txt==='Franchise'){
+    s.setAttribute('data-tt-title','⭐ Franchise szint');
+    s.setAttribute('data-tt-desc','Hányszor indítottál Franchise-t. Minden szint permanens szorzót ad.');
+    s.setAttribute('data-tt-rule','Minél magasabb, annál nagyobb a szorzó minden bevételre.');
+  }
+  if(txt==='Bónusz'){
+    s.setAttribute('data-tt-title','✖️ Franchise bónusz');
+    s.setAttribute('data-tt-desc','Jelenlegi permanens szorzód. Minden bevételt (kattintás + alkalmazottak) ennyivel szoroz.');
+  }
+  if(txt==='Kattintás'){
+    s.setAttribute('data-tt-title','👆 Összes kattintás');
+    s.setAttribute('data-tt-desc','Ennyi alkalommal kattintottál a kosárra összesen a játék során.');
+  }
+  if(txt==='Összesen'){
+    s.setAttribute('data-tt-title','💵 Összkereseted');
+    s.setAttribute('data-tt-desc','A teljes bevételed a játék kezdete óta (beleértve az elköltött pénzt is).');
+    s.setAttribute('data-tt-rule','Ez alapján oldódnak fel a bevételi mérföldkövek.');
+  }
+  if(txt==='Presztízs'){
+    s.setAttribute('data-tt-title','👑 Presztízs pontok');
+    s.setAttribute('data-tt-desc','Luxustárgyak vásárlásával szerzett státuszpontok. Mutatja mennyire sikeres a birodalmad.');
+    s.setAttribute('data-tt-rule','Franchise-kor NEM vész el! A megvásárolt luxustárgyak permanensek.');
+  }
+});
+
+document.getElementById('soundBtn').setAttribute('data-tt-title','🔊 Hang');
+document.getElementById('soundBtn').setAttribute('data-tt-desc','Hangeffektek ki/bekapcsolása.');
+
+document.querySelector('.customer-counter').setAttribute('data-tt-title','👥 Vásárlók');
+document.querySelector('.customer-counter').setAttribute('data-tt-desc','Ennyi vásárló járt eddig a webshopodban. Minél több alkalmazottad van, annál gyakrabban jönnek.');
+
+// Tab tooltips
+document.querySelectorAll('.panel-left .tab-btn').forEach(b=>{
+  const t=b.textContent.trim();
+  if(t.includes('Csapat')){
+    b.setAttribute('data-tt-title','👷 Csapat');
+    b.setAttribute('data-tt-desc','Alkalmazottaid akik automatikusan termelnek Ft/mp-et.');
+    b.setAttribute('data-tt-rule','Minden vásárlás drágítja a következőt (×1.15). A Franchise szorzó érvényes rájuk.');
+  }
+  if(t.includes('Fejlesztés')){
+    b.setAttribute('data-tt-title','⚡ Fejlesztések');
+    b.setAttribute('data-tt-desc','Egyszeri vásárlások amik szorozzák a kattintásod értékét.');
+    b.setAttribute('data-tt-rule','Nem vehetők újra. Franchise-kor elvesznek.');
+  }
+  if(t.includes('Luxus')){
+    b.setAttribute('data-tt-title','👑 Luxus tárgyak');
+    b.setAttribute('data-tt-desc','Státuszszimbólumok presztízs pontokért. A felső sávban jelennek meg ikonként.');
+    b.setAttribute('data-tt-rule','Franchise-kor NEM vesznek el! Permanens presztízs.');
+  }
+});
+document.querySelectorAll('.panel-right .tab-btn').forEach(b=>{
+  const t=b.textContent.trim();
+  if(t.includes('Célok')){
+    b.setAttribute('data-tt-title','🏆 Mérföldkövek');
+    b.setAttribute('data-tt-desc','Teljesítendő célok: kattintás, bevétel, csapat, franchise és konzultációk.');
+  }
+  if(t.includes('Riválisok')){
+    b.setAttribute('data-tt-title','⚔️ Rivális webshopok');
+    b.setAttribute('data-tt-desc','20 versenytárs akiket le kell győznöd a Ft/mp értékeddel.');
+    b.setAttribute('data-tt-rule','Ha a te Ft/mp-ed meghaladja az övékét, legyőzted őket!');
+  }
+  if(t.includes('Vélemények')){
+    b.setAttribute('data-tt-title','⭐ Vásárlói vélemények');
+    b.setAttribute('data-tt-desc','Automatikusan érkező kamu review-k a webshopodról.');
+    b.setAttribute('data-tt-rule','A vélemények minősége a bevételeddel együtt javul!');
+  }
+});
+
+initTooltips();
+// Re-init tooltips periodically for dynamically created elements
+
+</script>
+</body>
+</html>
